@@ -20,9 +20,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+
   likes    Like[]
   snippets    Snippet[]
   collections Collection[]
+  ownedWorkspaces        Workspace[]          @relation("WorkspaceOwner")
+  workspaceMembers      WorkspaceMember[]
+  workspaceSnippetsAdded WorkspaceSnippet[]   @relation("WorkspaceSnippetAdder")
 
   @@map("users")
 }
@@ -47,6 +51,8 @@ model Snippet {
   likes    Like[]
   tags        SnippetTag[]
   collections SnippetCollection[]
+
+  workspaces WorkspaceSnippet[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -119,4 +125,59 @@ model Like {
 
   @@unique([userId, snippetId])
   @@map("likes")
+}
+
+enum WorkspaceRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model Workspace {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  inviteCode  String   @unique
+
+  ownerId     Int
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  members     WorkspaceMember[]
+  snippets    WorkspaceSnippet[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          Int           @id @default(autoincrement())
+  workspaceId Int
+  userId      Int
+  role        WorkspaceRole @default(VIEWER)
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model WorkspaceSnippet {
+  workspaceId Int
+  snippetId   Int
+  addedById   Int
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  snippet     Snippet   @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  addedBy     User      @relation("WorkspaceSnippetAdder", fields: [addedById], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+
+  @@id([workspaceId, snippetId])
+  @@map("workspace_snippets")
 }
