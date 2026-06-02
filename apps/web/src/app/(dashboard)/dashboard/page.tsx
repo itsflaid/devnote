@@ -2,9 +2,20 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
+import { Prisma } from "@prisma/client"
 
 import SnippetList from "@/components/snippet/SnippetList"
 import { Snippet } from "@/components/snippet/SnippetDetail"
+
+type RawSnippet = Prisma.SnippetGetPayload<{
+  include: {
+    tags: {
+      include: {
+        tag: true
+      }
+    }
+  }
+}>
 
 async function DashboardContent({
   searchParams,
@@ -66,7 +77,7 @@ async function DashboardContent({
     }
   })
 
-  const snippets: Snippet[] = rawSnippets.map(s => ({
+  const snippets: Snippet[] = rawSnippets.map((s: RawSnippet) => ({
     id: s.id,
     title: s.title,
     language: s.language,
@@ -81,7 +92,7 @@ async function DashboardContent({
       month: "long",
       year: "numeric"
     }),
-    tags: s.tags.map(t => t.tag.name)
+    tags: s.tags.map((t) => t.tag.name)
   }))
 
   return (
@@ -108,7 +119,7 @@ export default function DashboardPage({
       <Suspense fallback={
         <div className="flex h-[80vh] items-center justify-center">
           <div className="text-center">
-            <p className="text-lg text-gray-500">Memuat daftar snippet...</p>
+            <p className="text-lg text-gray-500">Memuat daftar snippet...Hidup jokowi!!!</p>
           </div>
         </div>
       }>
