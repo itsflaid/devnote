@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { getLang } from "@/lib/languages"
-import CodeBlock from "@/components/snippet/CodeBlock"
+import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 

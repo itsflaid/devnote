@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import CopyButton from "./CopyButton"
 import CodeBlock from "./CodeBlock"
+import type { Snippet } from "./types"
 import { getLang } from "@/lib/languages"
 import { useAppStore } from "@/lib/store"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -11,20 +12,6 @@ import { faFolderPlus, faCheck, faCopy, faLink, faLinkSlash, faEllipsisVertical,
 interface SnippetDetailProps {
     snippet: Snippet
     onEdit: () => void
-}
-
-export interface Snippet {
-    id: number
-    title: string
-    language: string
-    description: string | null
-    code: string
-    tags: string[]
-    copyCount: number
-    isFavorite?: boolean
-    isPublic?: boolean
-    createdAt: string
-    shareId?: string | null
 }
 
 interface Collection {

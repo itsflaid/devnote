@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { LANGUAGE_OPTIONS } from "@/lib/languages"
-import { type Snippet } from "@/components/snippet/SnippetDetail"
+import { type Snippet } from "@/components/snippet/shared/types"
 
 interface SnippetModalProps {
     isOpen: boolean;

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import CodeBlock from "@/components/snippet/CodeBlock"
+import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faUser, faCopy, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons"

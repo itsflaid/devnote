@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import AddExistingSnippetModal from "@/components/workspace/AddExistingSnippetModal"
 import WorkspaceSnippetPanel from "@/components/workspace/WorkspaceSnippetPanel"
-import type { Snippet } from "@/components/snippet/SnippetDetail"
+import type { Snippet } from "@/components/snippet/shared/types"
 import WorkspaceHeader from "@/components/workspace/WorkspaceHeader"
 
 interface PageProps {

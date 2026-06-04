@@ -1,7 +1,8 @@
 "use client"
 
-import SnippetExplorer from "@/components/snippet/SnippetExplorer"
-import SnippetDetail, { type Snippet } from "@/components/snippet/SnippetDetail"
+import SnippetExplorer from "@/components/snippet/shared/SnippetExplorer"
+import SnippetDetail from "@/components/snippet/shared/SnippetDetail"
+import type { Snippet } from "@/components/snippet/shared/types"
 import RemoveWorkspaceSnippetButton from "@/components/workspace/RemoveWorkspaceSnippetButton"
 
 interface WorkspaceSnippetItem {
