@@ -2,7 +2,6 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-// import WorkspaceRoleBadge from "@/components/workspace/WorkspaceRoleBadge"
 import AddExistingSnippetModal from "@/components/workspace/AddExistingSnippetModal"
 import WorkspaceSnippetPanel from "@/components/workspace/WorkspaceSnippetPanel"
 import type { Snippet } from "@/components/snippet/SnippetDetail"
@@ -44,86 +43,96 @@ export default async function WorkspaceDetailPage({
         userId,
       },
     },
-  })
-
-  if (!member) {
-    notFound()
-  }
-
-  const workspace = await prisma.workspace.findUnique({
-    where: { id: workspaceId },
-    include: {
-      owner: {
+    select: {
+      role: true,
+      workspace: {
         select: {
           id: true,
           name: true,
-          email: true,
-          avatar: true,
-        },
-      },
-      _count: {
-        select: {
-          snippets: true,
-          members: true,
+          description: true,
+          inviteCode: true,
+          _count: {
+            select: {
+              snippets: true,
+              members: true,
+            },
+          },
         },
       },
     },
   })
 
-  if (!workspace) {
+  if (!member?.workspace) {
     notFound()
   }
 
-  const workspaceSnippets = await prisma.workspaceSnippet.findMany({
-    where: { workspaceId },
-    include: {
-      snippet: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatar: true,
-            },
-          },
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
-
+  const workspace = member.workspace
   const canEdit = member.role === "OWNER" || member.role === "EDITOR"
   const isOwner = member.role === "OWNER"
+  const shouldLoadAvailableSnippets = canEdit && action === "add-existing"
 
-  const availableSnippets = canEdit
-    ? await prisma.snippet.findMany({
-      where: {
-        userId,
-        workspaces: {
-          none: {
-            workspaceId,
+  const [workspaceSnippets, availableSnippets] = await Promise.all([
+    prisma.workspaceSnippet.findMany({
+      where: { workspaceId },
+      select: {
+        workspaceId: true,
+        snippetId: true,
+        snippet: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            code: true,
+            language: true,
+            isPublic: true,
+            isFavorite: true,
+            copyCount: true,
+            createdAt: true,
+            shareId: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+            tags: {
+              select: {
+                tag: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        title: true,
-        language: true,
-        description: true,
       },
       orderBy: {
         createdAt: "desc",
       },
-    })
-    : []
+    }),
+    shouldLoadAvailableSnippets
+      ? prisma.snippet.findMany({
+          where: {
+            userId,
+            workspaces: {
+              none: {
+                workspaceId,
+              },
+            },
+          },
+          select: {
+            id: true,
+            title: true,
+            language: true,
+            description: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        })
+      : Promise.resolve([]),
+  ])
 
   const snippets = workspaceSnippets.map((item) => {
     const snippet: Snippet = {

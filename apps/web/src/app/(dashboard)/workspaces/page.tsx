@@ -24,9 +24,15 @@ export default async function WorkspacesPage({ searchParams }: PageProps) {
 
   const memberships = await prisma.workspaceMember.findMany({
     where: { userId },
-    include: {
+    select: {
+      role: true,
       workspace: {
-        include: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          inviteCode: true,
+          createdAt: true,
           _count: {
             select: {
               snippets: true,
