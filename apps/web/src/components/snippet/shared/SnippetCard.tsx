@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from "react"
-import { Snippet } from "./SnippetDetail"
+import type { Snippet } from "./types"
 import { getLang } from "@/lib/languages"
 import { useAppStore } from "@/lib/store"
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import SnippetCard from "./SnippetCard"
-import type { Snippet } from "./SnippetDetail"
+import type { Snippet } from "./types"
 import SnippetListHeader from "./SnippetListHeader"
 
 interface SnippetExplorerProps<TItem> {

@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { type Snippet } from "./SnippetDetail"
-import SnippetDetail from "./SnippetDetail"
-import SnippetExplorer from "./SnippetExplorer"
+import { type Snippet } from "./shared/types"
+import SnippetDetail from "./shared/SnippetDetail"
+import SnippetExplorer from "./shared/SnippetExplorer"
+import SnippetListHeader from "./shared/SnippetListHeader"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCode, faPlus, faArrowLeft } from "@fortawesome/free-solid-svg-icons"
 import SnippetModal from "./SnippetModal"
 import { AnimatePresence, motion } from "framer-motion"
 import { useAppStore } from "@/lib/store"
 import SnippetListSkeleton from "./SnippetListSkeleton"
-import SnippetCard from "./SnippetCard"
+import SnippetCard from "./shared/SnippetCard"
 
 export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
   const [modalOpen, setModalOpen] = useState(false)
@@ -104,19 +105,16 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
               transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
               className="absolute inset-0 flex flex-col bg-[var(--bg2)]"
             >
-              <div className="shrink-0 border-b border-[var(--border)]">
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold tracking-[1px] uppercase text-[var(--text3)]">
-                      Semua Snippet
-                    </span>
-
-                    <span className="font-mono text-[10px] text-[var(--text4)] bg-[var(--surface2)] px-2 py-[2px] rounded-full">
-                      {snippets.length}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <SnippetListHeader
+                title="Semua Snippet"
+                visibleCount={snippets.length}
+                totalCount={snippets.length}
+                activeLang={null}
+                filterOpen={false}
+                availableLangs={[]}
+                onToggleFilter={() => undefined}
+                onToggleLang={() => undefined}
+              />
 
               <div className="flex-1 overflow-y-auto p-2">
                 {snippets.map((snippet) => (

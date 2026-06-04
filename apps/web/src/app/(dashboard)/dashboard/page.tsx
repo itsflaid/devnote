@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
 import SnippetList from "@/components/snippet/SnippetList"
-import { Snippet } from "@/components/snippet/SnippetDetail"
+import type { Snippet } from "@/components/snippet/shared/types"
 
 async function DashboardContent({
   searchParams,
