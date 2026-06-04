@@ -104,37 +104,37 @@ Access DevNote resources directly inside VS Code.
 
 ### Welcome Page
 
-<img src="PreviewIMG/welcome.png" width="100%"/>
+<img src="apps/web/PreviewIMG/welcome.png" width="100%"/>
 
 ### Login
 
-<img src="PreviewIMG/login.png" width="100%"/>
+<img src="apps/web/PreviewIMG/login.png" width="100%"/>
 
 ### Register
 
-<img src="PreviewIMG/registrasi.png" width="100%"/>
+<img src="apps/web/PreviewIMG/registrasi.png" width="100%"/>
 
 ### Dashboard
 
 #### Sidebar Closed
 
-<img src="PreviewIMG/dashboard.png" width="100%"/>
+<img src="apps/web/PreviewIMG/dashboard.png" width="100%"/>
 
 #### Sidebar Open
 
-<img src="PreviewIMG/dashboard2.png" width="100%"/>
+<img src="apps/web/PreviewIMG/dashboard2.png" width="100%"/>
 
 ### Create Resource
 
-<img src="PreviewIMG/tambah-snippet.png" width="100%"/>
+<img src="apps/web/PreviewIMG/tambah-snippet.png" width="100%"/>
 
 ### 404 Not Found
 
-<img src="PreviewIMG/404.png" width="100%"/>
+<img src="apps/web/PreviewIMG/404.png" width="100%"/>
 
 ### Error Page
 
-<img src="PreviewIMG/error.png" width="100%"/>
+<img src="apps/web/PreviewIMG/error.png" width="100%"/>
 
 ---
 
