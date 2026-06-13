@@ -10,6 +10,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceRoleBadge from "./WorkspaceRoleBadge"
+import WorkspaceSettingsModal from "./WorkspaceSettingsModal"
 
 interface WorkspaceHeaderProps {
   workspaceId: number
@@ -35,6 +36,7 @@ export default function WorkspaceHeader({
   isOwner,
 }: WorkspaceHeaderProps) {
   const [open, setOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
     <section className="shrink-0 border-b border-[var(--border)] bg-[var(--bg)]">
@@ -95,6 +97,8 @@ export default function WorkspaceHeader({
 
                   {isOwner && (
                     <button
+                      type="button"
+                      onClick={() => setSettingsOpen(true)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
                       aria-label="Pengaturan workspace"
                     >
@@ -123,6 +127,14 @@ export default function WorkspaceHeader({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {settingsOpen && (
+        <WorkspaceSettingsModal
+          workspaceId={workspaceId}
+          workspaceName={name}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
     </section>
   )
 }
