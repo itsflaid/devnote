@@ -38,6 +38,6 @@ export async function DELETE(
   })
 
   return NextResponse.json({
-    message: "Snippet berhasil di-remove dari workspace",
+    message: "Note berhasil di-remove dari workspace",
   })
 }

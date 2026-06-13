@@ -179,7 +179,7 @@ export default function ExploreClient() {
                 {!loading && (
                     <div className="mb-4 text-right">
                         <span className="text-[12px] text-[var(--text3)] font-mono">
-                            {total.toLocaleString()} snippet ditemukan
+                            {total.toLocaleString()} note ditemukan
                         </span>
                     </div>
                 )}
@@ -195,7 +195,7 @@ export default function ExploreClient() {
                                 <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                             </svg>
                         </div>
-                        <div className="text-[14px] font-medium text-[var(--text2)] mb-1">Tidak ada snippet ditemukan</div>
+                        <div className="text-[14px] font-medium text-[var(--text2)] mb-1">Tidak ada note ditemukan</div>
                         <div className="text-[12px] text-[var(--text3)]">Coba ubah filter atau kata kunci pencarian</div>
                     </div>
                 ) : (
@@ -306,7 +306,7 @@ export default function ExploreClient() {
                                 </span>
                             </div>
                             <p className="text-[11px] text-[var(--text3)] leading-relaxed">
-                                Platform untuk menyimpan, berbagi, dan menemukan snippet kode terbaik untuk developer.
+                                Platform untuk menyimpan, berbagi, dan menemukan note kode terbaik untuk developer.
                             </p>
                         </div>
 

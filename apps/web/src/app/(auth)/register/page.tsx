@@ -64,7 +64,7 @@ export default function RegisterPage() {
                     </h2>
 
                     <p className="text-[15px] text-black/50 font-light leading-relaxed max-w-[340px] mb-10">
-                        Every snippet you save is a minute saved tomorrow. Never lose good code again.
+                        Every note you save is a minute saved tomorrow. Never lose good code again.
                     </p>
 
                 </div>

@@ -17,7 +17,7 @@ interface SnippetListHeaderProps {
 }
 
 export default function SnippetListHeader({
-  title = "Semua Snippet",
+  title = "Semua Note",
   visibleCount,
   totalCount,
   activeLang,

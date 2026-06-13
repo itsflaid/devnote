@@ -183,7 +183,7 @@ export default function DashboardPage({
         fallback={
           <div className="flex h-[80vh] items-center justify-center">
             <div className="text-center">
-              <p className="text-lg text-gray-500">Memuat daftar snippet...</p>
+              <p className="text-lg text-gray-500">Memuat daftar note...</p>
             </div>
           </div>
         }

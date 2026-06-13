@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
     const { title, language, description, code, tags, workspaceId } = await req.json()
 
     // validasi — return 400 kalau title, language, atau code kosong
-    if (!title || !language || !code) {
-        return NextResponse.json({ message: "Semua harus diisi" }, { status: 400 })
+    if (!title?.trim() || !language || !description?.trim() || !code?.trim()) {
+        return NextResponse.json(
+            { message: "Judul, deskripsi, bahasa, dan kode wajib diisi" },
+            { status: 400 }
+        )
     }
 
     // simpan snippet baru ke database
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
         data: {
             title,
             language,
-            description: description?.trim() || null,
+            description: description.trim(),
             code,
             userId: Number(session.user.id),
             tags:{

@@ -123,7 +123,7 @@ export default function Topbar({ onNewSnippet, onToggleSidebar }: TopbarProps) {
                                 type="text"
                                 value={searchQuery}
                                 onChange={e => handleSearch(e.target.value)}
-                                placeholder="Cari snippets..."
+                                placeholder="Cari notes..."
                                 className={`w-full ${inputClass}`}
                             />
                             <FontAwesomeIcon
@@ -170,7 +170,7 @@ export default function Topbar({ onNewSnippet, onToggleSidebar }: TopbarProps) {
                             type="text"
                             value={searchQuery}
                             onChange={e => handleSearch(e.target.value)}
-                            placeholder="Cari snippets..."
+                            placeholder="Cari notes..."
                             className={`w-[min(42vw,520px)] ${inputClass}`}
                         />
                         <FontAwesomeIcon
@@ -216,7 +216,7 @@ export default function Topbar({ onNewSnippet, onToggleSidebar }: TopbarProps) {
                         className="flex h-[36px] items-center gap-2 bg-[var(--em)] text-[#07100c] font-semibold text-[12px] px-4 rounded-lg border border-[var(--em)] hover:bg-[#55e4ad] hover:border-[#55e4ad] transition-all"
                     >
                         <FontAwesomeIcon icon={faPlus} className="w-[12px] h-[12px]" />
-                        <span className="hidden lg:inline">Tambah Snippet</span>
+                        <span className="hidden lg:inline">Tambah Note</span>
                     </button>
 
                     <div className="relative" ref={dropdownRef}>
@@ -363,7 +363,7 @@ export default function Topbar({ onNewSnippet, onToggleSidebar }: TopbarProps) {
                                    text-white font-semibold text-[15px] py-[16px] sm:py-[17px] rounded-2xl 
                                    transition-all duration-200 shadow-md"
                                 >
-                                    Buka Snippet
+                                    Buka Note
                                 </button>
                             </div>
                         </div>

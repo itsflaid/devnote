@@ -180,7 +180,7 @@ export default function LoginPage() {
                     </h2>
 
                     <p className="text-[15px] text-black/50 font-light leading-relaxed max-w-[340px]">
-                        Stop rewriting the same code twice. Save, organize, and instantly reuse your best snippets.
+                        Stop rewriting the same code twice. Save, organize, and instantly reuse your best notes.
                     </p>
                 </div>
             </div>

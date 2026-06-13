@@ -92,7 +92,7 @@ export default function SnippetExplorer<TItem>({
 
           {visibleItems.length === 0 && (
             <p className="text-[12px] text-[var(--text4)] text-center py-8">
-              Tidak ada snippet dengan bahasa ini
+              Tidak ada note dengan bahasa ini
             </p>
           )}
         </div>
@@ -103,7 +103,7 @@ export default function SnippetExplorer<TItem>({
           renderDetail(selectedSnippet, selectedItem)
         ) : (
           <div className="flex-1 flex items-center justify-center text-[var(--text4)]">
-            Pilih snippet dulu.
+            Pilih note dulu.
           </div>
         )}
       </section>
@@ -153,7 +153,7 @@ export default function SnippetExplorer<TItem>({
 
                 {visibleItems.length === 0 && (
                   <p className="text-[12px] text-[var(--text4)] text-center py-8">
-                    Tidak ada snippet dengan bahasa ini
+                    Tidak ada note dengan bahasa ini
                   </p>
                 )}
               </div>

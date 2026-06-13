@@ -31,6 +31,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const snippetId = Number(id)
     const userId = Number(session.user.id)
 
+    if (!title?.trim() || !language || !description?.trim() || !code?.trim()) {
+        return NextResponse.json(
+            { message: "Judul, deskripsi, bahasa, dan kode wajib diisi" },
+            { status: 400 }
+        )
+    }
+
     const existingSnippet = await prisma.snippet.findUnique({
         where: { id: snippetId },
         select: { userId: true },
@@ -57,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         data: {
             title,
             language,
-            description,
+            description: description.trim(),
             code,
             tags: {
                 create: tags?.map((tagName: string) => ({
@@ -99,5 +106,5 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
         where: { id: snippetId }
     })
 
-    return NextResponse.json({ message: "Snippet berhasil dihapus" })
+    return NextResponse.json({ message: "Note berhasil dihapus" })
 }

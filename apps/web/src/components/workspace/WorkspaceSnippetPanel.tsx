@@ -32,7 +32,7 @@ export default function WorkspaceSnippetPanel({
   return (
     <>
       <SnippetExplorer
-        title="Shared Snippets"
+        title="Shared Notes"
         items={snippets}
         getSnippet={(item) => item.snippet}
         getKey={(item) => `${item.workspaceId}-${item.snippetId}`}

@@ -185,11 +185,11 @@ export default async function WorkspaceDetailPage({
         ) : (
           <div className="m-4 flex flex-1 items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-6 text-center sm:m-6 sm:p-10">
             <h3 className="text-lg font-semibold mb-2">
-              Belum ada snippet di workspace ini
+              Belum ada note di workspace ini
             </h3>
 
             <p className="text-sm text-[var(--text3)] max-w-md mx-auto mb-5">
-              Tambahkan snippet baru atau ambil dari library pribadi kamu.
+              Tambahkan note baru atau ambil dari library pribadi kamu.
             </p>
 
             {canEdit && (
@@ -205,7 +205,7 @@ export default async function WorkspaceDetailPage({
                   href={`/workspaces/${workspaceId}?action=new-snippet`}
                   className="px-4 py-2 rounded-lg bg-[var(--em)] text-[#0a0a0a] text-sm font-semibold hover:opacity-90 transition-all"
                 >
-                  New Snippet
+                  New Note
                 </Link>
               </div>
             )}

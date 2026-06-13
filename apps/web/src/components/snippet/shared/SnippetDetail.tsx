@@ -153,7 +153,7 @@ export default function SnippetDetail({
             if (!res.ok) throw new Error()
             router.refresh()
         } catch {
-            alert("Gagal menghapus snippet.")
+            alert("Gagal menghapus note.")
             setDeleting(false)
         }
     }
@@ -250,11 +250,6 @@ export default function SnippetDetail({
             <div className="px-5 lg:px-8 py-3 sm:py-5 border-b border-[var(--border)] bg-[#0d0f0e] shrink-0">
                 <div className="flex items-start justify-between gap-4 mb-1 sm:mb-3">
                     <div className="min-w-0">
-                        <div className="mb-3 hidden items-center gap-2 text-[10px] text-[var(--text4)] sm:flex">
-                            <span>Library</span>
-                            <span>›</span>
-                            <span>Snippets</span>
-                        </div>
                         <div className="flex items-center gap-2 mb-2">
                             <span
                                 className="font-mono text-[9px] font-semibold px-[7px] py-[2px] rounded-[3px] border"
@@ -526,7 +521,7 @@ export default function SnippetDetail({
                     ) : (
                         <FontAwesomeIcon icon={faLink} className="w-[9px] h-[9px]" />
                     )}
-                    {shareLoading ? "Memproses..." : "Bagikan Snippet →"}
+                    {shareLoading ? "Memproses..." : "Bagikan Note →"}
                 </button>
             </div>
 
@@ -538,10 +533,10 @@ export default function SnippetDetail({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h3 className="text-[15px] font-semibold text-[var(--text)]">
-                                    Bagikan Snippet
+                                    Bagikan Note
                                 </h3>
                                 <p className="text-[12px] text-[var(--text4)] mt-0.5">
-                                    Siapapun dengan link ini bisa melihat snippet kamu
+                                    Siapapun dengan link ini bisa melihat note kamu
                                 </p>
                             </div>
                             {showPersonalControls && (
@@ -627,7 +622,7 @@ export default function SnippetDetail({
             {confirmOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <div className="flex flex-col gap-4 rounded-xl p-6 w-full max-w-sm bg-[var(--surface)] border border-[var(--border)]">
-                        <h3 className="text-[15px] font-semibold">Hapus snippet ini?</h3>
+                        <h3 className="text-[15px] font-semibold">Hapus note ini?</h3>
                         <p className="text-[13px] text-[var(--text3)]">
                             <span className="font-medium text-[var(--text)]">{snippet.title}</span>{" "}
                             akan dihapus permanen.

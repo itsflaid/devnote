@@ -70,7 +70,7 @@ export default function ExploreTopbar({ search, onSearch }: ExploreTopbarProps) 
                             type="text"
                             value={inputVal}
                             onChange={(e) => handleChange(e.target.value)}
-                            placeholder="Cari snippet publik..."
+                            placeholder="Cari note publik..."
                             className="w-full 
                 bg-[var(--surface2)] 
                 border border-[var(--border2)] 
@@ -161,7 +161,7 @@ export default function ExploreTopbar({ search, onSearch }: ExploreTopbarProps) 
                                 type="text"
                                 value={inputVal}
                                 onChange={(e) => handleChange(e.target.value)}
-                                placeholder="Cari snippet publik..."
+                                placeholder="Cari note publik..."
                                 className="w-full bg-zinc-900 border border-zinc-700 focus:border-emerald-500 rounded-2xl px-5 py-[7px] pl-12 text-white placeholder:text-zinc-500 outline-none"
                             />
                             <FontAwesomeIcon

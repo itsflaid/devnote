@@ -137,7 +137,7 @@ export default function ExploreHero({ total, loading }: ExploreHeroProps) {
             <div className="relative z-10 text-center px-6 py-12 max-w-[900px] w-full">
 
                 <h1 className="text-[55px] lg:text-[80px] font-bold text-white tracking-[-2.5px] leading-[1.1] mb-2">
-                    Jelajahi Snippet
+                    Jelajahi Note
                 </h1>
 
                 <div className="text-[55px] lg:text-[80px] font-bold tracking-[-2.5px] leading-[1.1] mb-6 min-h-[1.2em]">
@@ -167,7 +167,7 @@ export default function ExploreHero({ total, loading }: ExploreHeroProps) {
                             0
                         </div>
                         <div className="text-[10px] md:text-[11px] text-emerald-400/60 mt-1 whitespace-nowrap">
-                            Snippet Publik
+                            Note Publik
                         </div>
                     </div>
 

@@ -12,7 +12,7 @@ export default function StatsSection({
   totalTags,
 }: StatsSectionProps) {
   const stats = [
-    { val: totalSnippets.toString(), label: "Snippets" },
+    { val: totalSnippets.toString(), label: "Notes" },
     { val: totalCopies.toString(), label: "Copies" },
     { val: totalTags.toString(), label: "Tags" },
   ]

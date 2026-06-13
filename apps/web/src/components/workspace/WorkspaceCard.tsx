@@ -46,7 +46,7 @@ export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
           <p className="text-lg font-mono font-semibold text-[var(--em)] leading-none">
             {workspace.snippetsCount}
           </p>
-          <p className="text-[11px] text-[var(--text4)] mt-1">Snippets</p>
+          <p className="text-[11px] text-[var(--text4)] mt-1">Notes</p>
         </div>
 
         <div className="rounded-xl bg-[var(--bg)] border border-[var(--border)] p-3">

@@ -139,22 +139,22 @@ export default function PreferencesPage() {
             </div>
 
             {/* Snippet Display */}
-            <Section title="Snippet Display">
-                <Row label="Default Sort" description="Urutan snippet saat pertama dibuka">
+            <Section title="Note Display">
+                <Row label="Default Sort" description="Urutan note saat pertama dibuka">
                     <SelectInput
                         options={SORT_OPTIONS}
                         value={prefs.sortOrder}
                         onChange={val => updatePref("sortOrder", val as "newest" | "oldest" | "az" | "za")}
                     />
                 </Row>
-                <Row label="Default Language" description="Bahasa yang dipilih saat buat snippet baru">
+                <Row label="Default Language" description="Bahasa yang dipilih saat buat note baru">
                     <SelectInput
                         options={LANGUAGE_OPTIONS}
                         value={prefs.defaultLanguage}
                         onChange={val => updatePref("defaultLanguage", val)}
                     />
                 </Row>
-                <Row label="List View" description="Tampilan kepadatan card snippet">
+                <Row label="List View" description="Tampilan kepadatan card note">
                     <SegmentedControl
                         options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]}
                         value={prefs.listView}

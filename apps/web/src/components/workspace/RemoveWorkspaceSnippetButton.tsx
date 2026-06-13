@@ -19,7 +19,7 @@ export default function RemoveWorkspaceSnippetButton({
 
   const removeSnippet = async () => {
     const ok = window.confirm(
-      "Remove snippet dari workspace ini? Snippet asli tetap ada di library owner."
+      "Remove note dari workspace ini? Note asli tetap ada di library owner."
     )
 
     if (!ok) return
@@ -32,7 +32,7 @@ export default function RemoveWorkspaceSnippetButton({
       })
 
       if (!res.ok) {
-        alert("Gagal remove snippet dari workspace")
+        alert("Gagal remove note dari workspace")
         return
       }
 

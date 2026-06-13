@@ -20,20 +20,20 @@ export const metadata: Metadata = {
   // Template ini yang dipakai semua page lain: "Dashboard | Devnote", "Explore | Devnote", dll
   // Homepage akan override ini lewat metadata di page.tsx
   title: {
-    default: "Devnote — Snippet Manager untuk Developer",
+    default: "Devnote — Code Note Manager untuk Developer",
     template: "%s | Devnote",
   },
 
   description:
-    "Devnote adalah snippet manager untuk developer. Simpan, organisir, dan temukan kembali kode favoritmu dengan cepat.",
+    "Devnote adalah code note manager untuk developer. Simpan, organisir, dan temukan kembali kode favoritmu dengan cepat.",
 
   keywords: [
-    "code snippet manager",
-    "snippet organizer",
+    "code note manager",
+    "code note organizer",
     "devnote",
     "developer tools",
     "simpan kode",
-    "next.js snippet app",
+    "next.js code note app",
   ],
 
   authors: [{ name: "Fadil" }],
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Devnote — Snippet Manager untuk Developer",
+        alt: "Devnote — Code Note Manager untuk Developer",
       },
     ],
   },

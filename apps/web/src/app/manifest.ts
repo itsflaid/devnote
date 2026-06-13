@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "DevNote — Snippet Manager untuk Developer",
+    name: "DevNote — Code Note Manager untuk Developer",
     short_name: "DevNote",
-    description: "Simpan, Gunakan, dan Bagikan Snippet Kode dengan Cepat",
+    description: "Simpan, Gunakan, dan Bagikan Note Kode dengan Cepat",
     start_url: "/",
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],

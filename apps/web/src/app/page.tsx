@@ -6,19 +6,19 @@ import type { Metadata } from "next"
 
 // Override metadata layout untuk homepage — lebih spesifik & keyword-rich
 export const metadata: Metadata = {
-    title: "Devnote — Simpan, Temukan, dan Bagikan Snippet Kode",
+    title: "Devnote — Simpan, Temukan, dan Bagikan Note Kode",
 
     description:
-        "Devnote adalah manajer snippet kode pribadi untuk developer. Simpan, organisir, cari, dan bagikan snippet kodemu dengan mudah — semua di satu tempat.",
+        "Devnote adalah manajer note kode pribadi untuk developer. Simpan, organisir, cari, dan bagikan note kodemu dengan mudah — semua di satu tempat.",
 
     keywords: [
-        "snippet manager",
-        "code snippet",
+        "code note manager",
+        "code note",
         "devnote",
         "manajer kode",
-        "simpan snippet kode",
+        "simpan note kode",
         "developer tool indonesia",
-        "snippet organizer",
+        "code note organizer",
     ],
 
     alternates: {
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     },
 
     openGraph: {
-        title: "Devnote — Simpan, Temukan, dan Bagikan Snippet Kode",
+        title: "Devnote — Simpan, Temukan, dan Bagikan Note Kode",
         description:
-            "Semua snippet kodemu di satu tempat — terorganisir, mudah dicari, siap dipakai kapan saja.",
+            "Semua note kodemu di satu tempat — terorganisir, mudah dicari, siap dipakai kapan saja.",
         url: "/",
     },
 
@@ -85,7 +85,7 @@ function WelcomePage() {
                     Bagikan.
                 </h1>
                 <p className="text-[15px] text-black/50 font-light leading-relaxed max-w-[360px] mb-10">
-                    Semua snippet kodemu di satu tempat —
+                    Semua note kodemu di satu tempat —
                     terorganisir, mudah dicari, siap dipakai kapan saja.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-[400px]">

@@ -109,7 +109,7 @@ export async function POST(
 
   if (!snippet) {
     return NextResponse.json(
-      { message: "Snippet tidak ditemukan di library kamu" },
+      { message: "Note tidak ditemukan di library kamu" },
       { status: 404 }
     )
   }

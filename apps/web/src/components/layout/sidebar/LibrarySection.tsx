@@ -114,7 +114,7 @@ export default function LibrarySection({
       withBorder={false}
     >
       <NavItem
-        label="All Snippets"
+        label="All Notes"
         count={totalSnippets}
         active={isAll}
         onClick={() => setFilter(null)}
@@ -143,7 +143,7 @@ export default function LibrarySection({
       />
 
       <NavItem
-        label="Workspace Snippets"
+        label="Workspace Notes"
         count={workspaceSnippetsCount}
         active={activeFilter === "workspace"}
         onClick={() => setFilter("filter", "workspace")}

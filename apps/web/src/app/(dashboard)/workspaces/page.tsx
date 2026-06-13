@@ -68,7 +68,7 @@ export default async function WorkspacesPage({ searchParams }: PageProps) {
             </p>
             <h1 className="text-2xl font-semibold">Workspaces</h1>
             <p className="mt-2 max-w-2xl text-sm text-[var(--text3)]">
-              Ruang kolaborasi untuk mengelompokkan snippet berdasarkan project,
+              Ruang kolaborasi untuk mengelompokkan note berdasarkan project,
               tim, atau kelas.
             </p>
           </div>

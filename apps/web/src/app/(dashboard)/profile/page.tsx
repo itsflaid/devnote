@@ -148,7 +148,7 @@ export default function ProfilePage() {
             <Section title="Statistik">
                 <div className="px-5 py-4 flex flex-col gap-4">
                     <div className="grid grid-cols-4 gap-2">
-                        <StatCard val={stats?.totalSnippets ?? "—"} label="Snippets" />
+                        <StatCard val={stats?.totalSnippets ?? "—"} label="Notes" />
                         <StatCard val={stats?.totalCollections ?? "—"} label="Collections" />
                         <StatCard val={stats?.totalLanguages ?? "—"} label="Bahasa" />
                         <StatCard val={stats?.totalTags ?? "—"} label="Tags" />
@@ -218,7 +218,7 @@ export default function ProfilePage() {
             <Section title="Danger Zone">
                 <Row
                     label="Hapus Akun"
-                    description="Semua snippet, collection, dan data akan dihapus permanen"
+                    description="Semua note, collection, dan data akan dihapus permanen"
                 >
                     <button
                         onClick={() => setConfirmDelete(true)}
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                             </div>
                         </div>
                         <p className="text-[13px] text-[var(--text3)] leading-relaxed">
-                            Semua snippet, collection, dan data akunmu akan dihapus permanen dari server.
+                            Semua note, collection, dan data akunmu akan dihapus permanen dari server.
                         </p>
                         <div className="flex justify-end gap-2">
                             <button

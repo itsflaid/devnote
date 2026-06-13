@@ -46,11 +46,11 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
 
             <div>
               <p className="text-[15px] font-semibold text-[var(--text)] mb-1">
-                Belum ada snippet
+                Belum ada note
               </p>
 
               <p className="text-[13px] text-[var(--text3)]">
-                Mulai simpan kode pertamamu
+                Mulai simpan note pertamamu
               </p>
             </div>
 
@@ -59,7 +59,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
               className="flex items-center gap-2 bg-[var(--em)] text-[#0a0a0a] font-semibold text-[13px] px-5 py-2.5 rounded-lg hover:bg-[#2bc48a] transition-all"
             >
               <FontAwesomeIcon icon={faPlus} className="w-[12px] h-[12px]" />
-              Tambah Snippet
+              Tambah Note
             </button>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
       {/* desktop */}
       <div className="hidden lg:flex h-full overflow-hidden">
         <SnippetExplorer
-          title="Semua Snippet"
+          title="Semua Note"
           items={snippets}
           getSnippet={(snippet) => snippet}
           getKey={(snippet) => snippet.id}
@@ -106,7 +106,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
               className="absolute inset-0 flex flex-col bg-[var(--bg2)]"
             >
               <SnippetListHeader
-                title="Semua Snippet"
+                title="Semua Note"
                 visibleCount={snippets.length}
                 totalCount={snippets.length}
                 activeLang={null}

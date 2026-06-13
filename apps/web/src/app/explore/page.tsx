@@ -4,7 +4,7 @@ import ExploreClient from "./ExploreClient"
 
 export const metadata: Metadata = {
     title: "Explore — DevNote",
-    description: "Temukan dan bagikan snippet kode publik dari developer di seluruh dunia.",
+    description: "Temukan dan bagikan note kode publik dari developer di seluruh dunia.",
 }
 
 export default function ExplorePage() {

@@ -55,14 +55,14 @@ export default function AddExistingSnippetModal({
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.message || "Gagal menambahkan snippet")
+        setError(data.message || "Gagal menambahkan note")
         return
       }
 
       router.refresh()
       router.push(`/workspaces/${workspaceId}`)
     } catch {
-      setError("Terjadi error saat menambahkan snippet")
+      setError("Terjadi error saat menambahkan note")
     } finally {
       setLoadingId(null)
     }
@@ -78,9 +78,9 @@ export default function AddExistingSnippetModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">Add Existing Snippet</h2>
+          <h2 className="text-lg font-semibold">Add Existing Note</h2>
           <p className="text-sm text-[var(--text3)] mt-1">
-            Ambil snippet dari library kamu dan masukkan ke workspace ini.
+            Ambil note dari library kamu dan masukkan ke workspace ini.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function AddExistingSnippetModal({
           autoFocus
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari snippet..."
+          placeholder="Cari note..."
           className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--em-border)] mb-3"
         />
 
@@ -129,7 +129,7 @@ export default function AddExistingSnippetModal({
           ) : (
             <div className="rounded-xl border border-dashed border-[var(--border)] p-6 text-center">
               <p className="text-sm text-[var(--text3)]">
-                Tidak ada snippet yang bisa ditambahkan.
+                Tidak ada note yang bisa ditambahkan.
               </p>
             </div>
           )}

@@ -166,7 +166,7 @@ export default function JoinPage() {
                                     Memeriksa kode...
                                 </span>
                             ) : (
-                                "Buka Snippet"
+                                "Buka Note"
                             )}
                         </button>
                     </form>

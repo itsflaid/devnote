@@ -59,8 +59,8 @@ export default function SnippetModal({
     };
 
     const handleSubmit = async () => {
-        if (!form.title.trim() || !form.code.trim()) {
-            setError("Judul dan kode wajib diisi.");
+        if (!form.title.trim() || !form.description.trim() || !form.code.trim()) {
+            setError("Judul, deskripsi, dan kode wajib diisi.");
             return;
         }
 
@@ -86,13 +86,13 @@ export default function SnippetModal({
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error || "Gagal menyimpan snippet.");
+                throw new Error(data.error || data.message || "Gagal menyimpan note.");
             }
 
             router.refresh();
             onClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Gagal menyimpan snippet.");
+            setError(err instanceof Error ? err.message : "Gagal menyimpan note.");
         } finally {
             setLoading(false);
         }
@@ -110,7 +110,7 @@ export default function SnippetModal({
                 {/* Header — judul berubah sesuai mode */}
                 <div className="flex items-center justify-between">
                     <h2 className="font-semibold text-base" style={{ color: "var(--text)" }}>
-                        {isEditMode ? "Edit Snippet" : "Tambah Snippet Baru"}
+                        {isEditMode ? "Edit Note" : "Tambah Note Baru"}
                     </h2>
                     <button onClick={onClose} style={{ color: "var(--text-muted)" }}>
                         <FontAwesomeIcon icon={faTimes} />
@@ -161,13 +161,14 @@ export default function SnippetModal({
                 {/* Field: Deskripsi */}
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-                        Deskripsi <span style={{ color: "var(--text-muted)" }}>(opsional)</span>
+                        Deskripsi <span style={{ color: "var(--em)" }}>*</span>
                     </label>
                     <input
                         name="description"
                         value={form.description}
                         onChange={handleChange}
-                        placeholder="Singkat aja, buat apa snippet ini"
+                        placeholder="Explain what this code does and when to use it..."
+                        required
                         className="rounded-lg px-3 py-2 text-sm outline-none"
                         style={{
                             background: "var(--bg)",
@@ -250,7 +251,7 @@ export default function SnippetModal({
                         {/* icon dan teks berubah sesuai mode */}
                         {loading
                             ? (isEditMode ? "Menyimpan..." : "Menyimpan...")
-                            : (isEditMode ? "Simpan Perubahan" : "Simpan Snippet")
+                            : (isEditMode ? "Simpan Perubahan" : "Simpan Note")
                         }
                     </button>
                 </div>

@@ -26,7 +26,7 @@ export default function ExploreSection({ onNavigate }: ExploreSectionProps) {
             className="w-[11px] h-[11px] shrink-0 text-[var(--em)] group-hover:text-[#0a0a0a] transition-all"
           />
           <span className="text-[12px] font-medium text-[var(--em)] group-hover:text-[#0a0a0a] transition-all">
-            Jelajahi Snippet Publik
+            Jelajahi Note Publik
           </span>
         </div>
 

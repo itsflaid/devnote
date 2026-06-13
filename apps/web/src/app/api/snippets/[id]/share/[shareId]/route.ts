@@ -41,7 +41,7 @@ export async function GET(
     })
 
     if (!snippet) {
-        return NextResponse.json({ error: "Snippet not found" }, { status: 404 })
+        return NextResponse.json({ error: "Note not found" }, { status: 404 })
     }
 
     const tags = snippet.tags.map(t => t.tag.name)

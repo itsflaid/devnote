@@ -66,7 +66,7 @@ export default function CreateWorkspaceModal() {
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Buat Workspace</h2>
           <p className="text-sm text-[var(--text3)] mt-1">
-            Buat ruang kolaborasi snippet buat project, tim, atau kelas.
+            Buat ruang kolaborasi note buat project, tim, atau kelas.
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export default function CreateWorkspaceModal() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Workspace buat nyimpen snippet bareng..."
+              placeholder="Workspace buat nyimpen note bareng..."
               rows={3}
               className="w-full resize-none bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--em-border)]"
             />
