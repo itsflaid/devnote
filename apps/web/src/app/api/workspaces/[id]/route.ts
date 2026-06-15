@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { generateInviteCode, requireWorkspaceRole } from "@/lib/workspace"
+import { requireWorkspaceRole } from "@/lib/workspace"
+import { generateWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 function parseWorkspaceId(id: string) {
   const workspaceId = Number(id)
@@ -154,10 +155,10 @@ export async function PATCH(
     return NextResponse.json({ message: "Forbidden" }, { status: 403 })
   }
 
-  let inviteCode = generateInviteCode()
+  let inviteCode = generateWorkspaceInviteCode()
 
   while (await prisma.workspace.findUnique({ where: { inviteCode } })) {
-    inviteCode = generateInviteCode()
+    inviteCode = generateWorkspaceInviteCode()
   }
 
   const workspace = await prisma.workspace.update({

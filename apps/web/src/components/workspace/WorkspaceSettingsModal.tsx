@@ -16,6 +16,7 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceRoleBadge from "./WorkspaceRoleBadge"
+import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 type WorkspaceRole = "OWNER" | "EDITOR" | "VIEWER"
 
@@ -208,7 +209,9 @@ export default function WorkspaceSettingsModal({
     resetFeedback()
 
     try {
-      await navigator.clipboard.writeText(currentInviteCode)
+      await navigator.clipboard.writeText(
+        formatWorkspaceInviteCode(currentInviteCode)
+      )
       setNotice("Kode undangan disalin.")
     } catch {
       setError("Kode undangan gagal disalin")
@@ -448,7 +451,7 @@ export default function WorkspaceSettingsModal({
                 </p>
                 <div className="mt-3 flex min-w-0 flex-col gap-2 sm:flex-row">
                   <code className="min-w-0 flex-1 truncate rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-sm text-[var(--em)]">
-                    {currentInviteCode}
+                    {formatWorkspaceInviteCode(currentInviteCode)}
                   </code>
                   <div className="flex gap-2">
                     <button

@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceRoleBadge from "./WorkspaceRoleBadge"
 import WorkspaceSettingsModal from "./WorkspaceSettingsModal"
+import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 interface WorkspaceHeaderProps {
   workspaceId: number
@@ -116,7 +117,7 @@ export default function WorkspaceHeader({
                   {membersCount} members
                 </span>
                 <span className="max-w-full truncate rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 font-mono text-xs text-[var(--em-dim)]">
-                  {inviteCode}
+                  {formatWorkspaceInviteCode(inviteCode)}
                 </span>
               </div>
             </div>

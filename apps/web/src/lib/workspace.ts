@@ -2,17 +2,6 @@ import { prisma } from "@/lib/prisma"
 
 type WorkspaceRole = "OWNER" | "EDITOR" | "VIEWER"
 
-export function generateInviteCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-  let code = "DVNT-"
-
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)]
-  }
-
-  return code
-}
-
 export async function getWorkspaceMember(workspaceId: number, userId: number) {
   return prisma.workspaceMember.findUnique({
     where: {
