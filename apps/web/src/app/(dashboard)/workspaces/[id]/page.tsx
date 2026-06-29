@@ -69,7 +69,6 @@ export default async function WorkspaceDetailPage({
 
   const workspace = member.workspace
   const canEdit = member.role === "OWNER" || member.role === "EDITOR"
-  const isOwner = member.role === "OWNER"
   const shouldLoadAvailableSnippets = canEdit && action === "add-existing"
 
   const [workspaceSnippets, availableSnippets] = await Promise.all([
@@ -173,7 +172,6 @@ export default async function WorkspaceDetailPage({
           membersCount={workspace._count.members}
           role={member.role}
           canEdit={canEdit}
-          isOwner={isOwner}
         />
 
         {snippets.length > 0 ? (

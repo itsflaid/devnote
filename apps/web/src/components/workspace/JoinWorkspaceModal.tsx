@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
+import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 export default function JoinWorkspaceModal() {
   const router = useRouter()
@@ -12,6 +13,26 @@ export default function JoinWorkspaceModal() {
 
   const close = () => {
     router.push("/workspaces")
+  }
+
+  const handleCodeChange = (value: string) => {
+    const normalizedValue = value.trim().toUpperCase()
+
+    if (/^DVNT-[A-Z0-9]{0,6}$/.test(normalizedValue)) {
+      setInviteCode(normalizedValue)
+
+      if (error) {
+        setError("")
+      }
+      return
+    }
+
+    const rawCode = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 9)
+    setInviteCode(formatWorkspaceInviteCode(rawCode))
+
+    if (error) {
+      setError("")
+    }
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -76,8 +97,11 @@ export default function JoinWorkspaceModal() {
             <input
               autoFocus
               value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              placeholder="DVNT-ZPL9AU"
+              onChange={(e) => handleCodeChange(e.target.value)}
+              placeholder="XXX-XXX-XXX"
+              maxLength={11}
+              autoComplete="off"
+              spellCheck={false}
               className="w-full font-mono bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--em-border)]"
             />
           </div>

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { generateInviteCode, requireWorkspaceRole } from "@/lib/workspace"
+import { requireWorkspaceRole } from "@/lib/workspace"
+import { generateWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
+
+function parseWorkspaceId(id: string) {
+  const workspaceId = Number(id)
+  return Number.isInteger(workspaceId) && workspaceId > 0 ? workspaceId : null
+}
 
 export async function GET(
   _: NextRequest,
@@ -15,7 +21,14 @@ export async function GET(
 
   const userId = Number(session.user.id)
   const { id } = await params
-  const workspaceId = Number(id)
+  const workspaceId = parseWorkspaceId(id)
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
 
   const member = await requireWorkspaceRole(workspaceId, userId, [
     "OWNER",
@@ -74,8 +87,24 @@ export async function PUT(
 
   const userId = Number(session.user.id)
   const { id } = await params
-  const workspaceId = Number(id)
+  const workspaceId = parseWorkspaceId(id)
   const { name, description } = await req.json()
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
+
+  const normalizedName = String(name ?? "").trim()
+
+  if (!normalizedName) {
+    return NextResponse.json(
+      { message: "Nama workspace wajib diisi" },
+      { status: 400 }
+    )
+  }
 
   const member = await requireWorkspaceRole(workspaceId, userId, ["OWNER"])
 
@@ -86,8 +115,13 @@ export async function PUT(
   const workspace = await prisma.workspace.update({
     where: { id: workspaceId },
     data: {
-      ...(name?.trim() && { name: name.trim() }),
-      description: description?.trim() || null,
+      name: normalizedName,
+      description: String(description ?? "").trim() || null,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
     },
   })
 
@@ -106,7 +140,14 @@ export async function PATCH(
 
   const userId = Number(session.user.id)
   const { id } = await params
-  const workspaceId = Number(id)
+  const workspaceId = parseWorkspaceId(id)
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
 
   const member = await requireWorkspaceRole(workspaceId, userId, ["OWNER"])
 
@@ -114,10 +155,10 @@ export async function PATCH(
     return NextResponse.json({ message: "Forbidden" }, { status: 403 })
   }
 
-  let inviteCode = generateInviteCode()
+  let inviteCode = generateWorkspaceInviteCode()
 
   while (await prisma.workspace.findUnique({ where: { inviteCode } })) {
-    inviteCode = generateInviteCode()
+    inviteCode = generateWorkspaceInviteCode()
   }
 
   const workspace = await prisma.workspace.update({
@@ -129,4 +170,41 @@ export async function PATCH(
   return NextResponse.json({
     inviteCode: workspace.inviteCode,
   })
+}
+
+export async function DELETE(
+  _: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth()
+
+  if (!session?.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
+  const workspaceId = parseWorkspaceId(id)
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
+
+  const owner = await requireWorkspaceRole(
+    workspaceId,
+    Number(session.user.id),
+    ["OWNER"]
+  )
+
+  if (!owner) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+  }
+
+  await prisma.workspace.delete({
+    where: { id: workspaceId },
+  })
+
+  return NextResponse.json({ success: true })
 }

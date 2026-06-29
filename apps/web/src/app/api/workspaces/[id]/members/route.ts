@@ -5,6 +5,11 @@ import { requireWorkspaceRole } from "@/lib/workspace"
 
 const editableRoles = ["EDITOR", "VIEWER"] as const
 
+function parseWorkspaceId(id: string) {
+  const workspaceId = Number(id)
+  return Number.isInteger(workspaceId) && workspaceId > 0 ? workspaceId : null
+}
+
 async function getOwner(workspaceId: number) {
   const session = await auth()
 
@@ -30,9 +35,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const workspaceId = Number(id)
+  const workspaceId = parseWorkspaceId(id)
 
-  if (!Number.isInteger(workspaceId)) {
+  if (!workspaceId) {
     return NextResponse.json(
       { message: "Workspace tidak valid" },
       { status: 400 }
@@ -77,9 +82,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const workspaceId = Number(id)
+  const workspaceId = parseWorkspaceId(id)
 
-  if (!Number.isInteger(workspaceId)) {
+  if (!workspaceId) {
     return NextResponse.json(
       { message: "Workspace tidak valid" },
       { status: 400 }
@@ -92,7 +97,7 @@ export async function PATCH(
     return authorization.error
   }
 
-  const { memberId, role } = await req.json()
+  const { memberId, role } = await req.json().catch(() => ({}))
   const parsedMemberId = Number(memberId)
 
   if (
@@ -149,4 +154,147 @@ export async function PATCH(
   })
 
   return NextResponse.json({ member })
+}
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const workspaceId = parseWorkspaceId(id)
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
+
+  const authorization = await getOwner(workspaceId)
+
+  if (authorization.error) {
+    return authorization.error
+  }
+
+  const { memberId } = await req.json().catch(() => ({}))
+  const parsedMemberId = Number(memberId)
+
+  if (!Number.isInteger(parsedMemberId)) {
+    return NextResponse.json(
+      { message: "Member tidak valid" },
+      { status: 400 }
+    )
+  }
+
+  const target = await prisma.workspaceMember.findFirst({
+    where: {
+      id: parsedMemberId,
+      workspaceId,
+      role: {
+        not: "OWNER",
+      },
+    },
+    select: {
+      id: true,
+      userId: true,
+    },
+  })
+
+  if (!target) {
+    return NextResponse.json(
+      { message: "Member tidak ditemukan" },
+      { status: 404 }
+    )
+  }
+
+  await prisma.$transaction([
+    prisma.workspace.update({
+      where: { id: workspaceId },
+      data: { ownerId: target.userId },
+    }),
+    prisma.workspaceMember.update({
+      where: { id: authorization.owner.id },
+      data: { role: "EDITOR" },
+    }),
+    prisma.workspaceMember.update({
+      where: { id: target.id },
+      data: { role: "OWNER" },
+    }),
+  ])
+
+  return NextResponse.json({ success: true })
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth()
+
+  if (!session?.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
+  const workspaceId = parseWorkspaceId(id)
+
+  if (!workspaceId) {
+    return NextResponse.json(
+      { message: "Workspace tidak valid" },
+      { status: 400 }
+    )
+  }
+
+  const userId = Number(session.user.id)
+  const requester = await requireWorkspaceRole(workspaceId, userId, [
+    "OWNER",
+    "EDITOR",
+    "VIEWER",
+  ])
+
+  if (!requester) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+  }
+
+  if (requester.role === "OWNER") {
+    const { memberId } = await req.json().catch(() => ({}))
+    const parsedMemberId = Number(memberId)
+
+    if (!Number.isInteger(parsedMemberId)) {
+      return NextResponse.json(
+        { message: "Member tidak valid" },
+        { status: 400 }
+      )
+    }
+
+    const target = await prisma.workspaceMember.findFirst({
+      where: {
+        id: parsedMemberId,
+        workspaceId,
+        role: {
+          not: "OWNER",
+        },
+      },
+      select: { id: true },
+    })
+
+    if (!target) {
+      return NextResponse.json(
+        { message: "Member tidak ditemukan" },
+        { status: 404 }
+      )
+    }
+
+    await prisma.workspaceMember.delete({
+      where: { id: target.id },
+    })
+
+    return NextResponse.json({ success: true })
+  }
+
+  await prisma.workspaceMember.delete({
+    where: { id: requester.id },
+  })
+
+  return NextResponse.json({ success: true })
 }

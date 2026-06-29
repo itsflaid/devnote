@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { normalizeWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
   const userId = Number(session.user.id)
   const { inviteCode } = await req.json()
 
-  const code = String(inviteCode ?? "").trim().toUpperCase()
+  const code = normalizeWorkspaceInviteCode(inviteCode)
 
   if (!code) {
     return NextResponse.json(

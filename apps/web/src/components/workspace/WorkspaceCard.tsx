@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 interface WorkspaceCardProps {
   workspace: {
@@ -58,7 +59,9 @@ export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
       </div>
 
       <div className="flex items-center justify-between gap-3 text-[11px] text-[var(--text4)]">
-        <span className="min-w-0 truncate font-mono">{workspace.inviteCode}</span>
+        <span className="min-w-0 truncate font-mono">
+          {formatWorkspaceInviteCode(workspace.inviteCode)}
+        </span>
         <span className="shrink-0 group-hover:text-[var(--em)] transition-colors">
           Buka →
         </span>

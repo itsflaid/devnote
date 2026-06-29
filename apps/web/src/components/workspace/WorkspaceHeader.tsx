@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceRoleBadge from "./WorkspaceRoleBadge"
 import WorkspaceSettingsModal from "./WorkspaceSettingsModal"
+import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
 
 interface WorkspaceHeaderProps {
   workspaceId: number
@@ -21,7 +22,6 @@ interface WorkspaceHeaderProps {
   membersCount: number
   role: "OWNER" | "EDITOR" | "VIEWER"
   canEdit: boolean
-  isOwner: boolean
 }
 
 export default function WorkspaceHeader({
@@ -33,7 +33,6 @@ export default function WorkspaceHeader({
   membersCount,
   role,
   canEdit,
-  isOwner,
 }: WorkspaceHeaderProps) {
   const [open, setOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -95,16 +94,14 @@ export default function WorkspaceHeader({
                     </>
                   )}
 
-                  {isOwner && (
-                    <button
-                      type="button"
-                      onClick={() => setSettingsOpen(true)}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
-                      aria-label="Pengaturan workspace"
-                    >
-                      <FontAwesomeIcon icon={faGear} className="h-3.5 w-3.5" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSettingsOpen(true)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
+                    aria-label="Pengaturan workspace"
+                  >
+                    <FontAwesomeIcon icon={faGear} className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
 
@@ -120,7 +117,7 @@ export default function WorkspaceHeader({
                   {membersCount} members
                 </span>
                 <span className="max-w-full truncate rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 font-mono text-xs text-[var(--em-dim)]">
-                  {inviteCode}
+                  {formatWorkspaceInviteCode(inviteCode)}
                 </span>
               </div>
             </div>
@@ -132,6 +129,9 @@ export default function WorkspaceHeader({
         <WorkspaceSettingsModal
           workspaceId={workspaceId}
           workspaceName={name}
+          description={description}
+          inviteCode={inviteCode}
+          role={role}
           onClose={() => setSettingsOpen(false)}
         />
       )}
