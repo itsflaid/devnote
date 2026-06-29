@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useTransition } from "react"
+import { useState, useEffect, useCallback, useTransition, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import ExploreSnippetCard, { PublicSnippet } from "@/components/explore/ExploreSnippetCard"
@@ -47,6 +47,7 @@ export default function ExploreClient() {
     const [loading, setLoading] = useState(true)
 
     const [showMobileFilter, setShowMobileFilter] = useState(false)
+    const fetchedRef = useRef(false)
 
     const pushParams = useCallback((overrides: Record<string, string>) => {
         const params = new URLSearchParams()
@@ -85,8 +86,10 @@ export default function ExploreClient() {
     }, [])
 
     useEffect(() => {
+        if (fetchedRef.current) return
+        fetchedRef.current = true
         fetchSnippets({ sort, lang, search, page })
-    }, [sort, lang, search, page, fetchSnippets])
+    }, [fetchSnippets, sort, lang, search, page])
 
     // Handlers
     const handleSort = (val: string) => {
@@ -94,6 +97,7 @@ export default function ExploreClient() {
         setPage(1)
         pushParams({ sort: val, page: "1" })
         setShowMobileFilter(false)
+        fetchSnippets({ sort: val, lang, search, page: 1 })
     }
 
     const handleLang = (val: string) => {
@@ -101,18 +105,21 @@ export default function ExploreClient() {
         setPage(1)
         pushParams({ lang: val, page: "1" })
         setShowMobileFilter(false)
+        fetchSnippets({ sort, lang: val, search, page: 1 })
     }
 
     const handleSearch = (val: string) => {
         setSearch(val)
         setPage(1)
         pushParams({ search: val, page: "1" })
+        fetchSnippets({ sort, lang, search: val, page: 1 })
     }
 
     const handlePage = (val: number) => {
         setPage(val)
         pushParams({ page: String(val) })
         window.scrollTo({ top: 0, behavior: "smooth" })
+        fetchSnippets({ sort, lang, search, page: val })
     }
 
     const handleLikeToggle = (id: number, liked: boolean, count: number) => {

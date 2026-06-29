@@ -65,6 +65,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
         </div>
 
         <SnippetModal
+          key="create"
           isOpen={modalOpen}
           onClose={handleModalClose}
           snippetToEdit={null}
@@ -164,6 +165,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
       </div>
 
       <SnippetModal
+        key={editSnippet?.id ?? 'create'}
         isOpen={modalOpen || !!editSnippet}
         onClose={handleModalClose}
         snippetToEdit={editSnippet}

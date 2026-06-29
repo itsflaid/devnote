@@ -63,6 +63,7 @@ export default function WorkspaceSnippetPanel({
       />
 
       <SnippetModal
+        key={editingSnippet?.id ?? 'create'}
         isOpen={!!editingSnippet}
         onClose={() => setEditingSnippet(null)}
         snippetToEdit={editingSnippet}

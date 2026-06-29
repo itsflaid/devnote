@@ -3,7 +3,6 @@
 When working in this repository:
 
 - Create a branch before making changes unless the user explicitly asks to work on the current branch.
-- Use branch names with the `codex/` prefix, for example `codex/fix-workspaces-route`.
 - Keep changes scoped to the user request.
 - Do not revert unrelated user changes.
 - Prefer opening a pull request instead of pushing directly to `main`, unless the user explicitly asks to push to `main`.

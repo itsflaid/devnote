@@ -11,7 +11,20 @@ interface SnippetModalProps {
     isOpen: boolean;
     onClose: () => void;
     workspaceId?: number;
-    snippetToEdit?: Snippet | null; // kalau ada → mode edit, kalau null → mode tambah
+    snippetToEdit?: Snippet | null;
+}
+
+function getInitialForm(snippetToEdit?: Snippet | null) {
+    if (snippetToEdit) {
+        return {
+            title: snippetToEdit.title,
+            language: snippetToEdit.language,
+            description: snippetToEdit.description ?? "",
+            code: snippetToEdit.code,
+            tags: snippetToEdit.tags.join(", "),
+        }
+    }
+    return { title: "", language: "typescript", description: "", code: "", tags: "" }
 }
 
 export default function SnippetModal({
@@ -24,31 +37,17 @@ export default function SnippetModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const isEditMode = !!snippetToEdit; // true kalau mode edit
+    const isEditMode = !!snippetToEdit;
 
-    const [form, setForm] = useState({
-        title: "",
-        language: "typescript",
-        description: "",
-        code: "",
-        tags: "",
-    });
+    const [form, setForm] = useState(() => getInitialForm(snippetToEdit));
 
-    // prefill form kalau mode edit — setiap kali snippetToEdit berubah
     useEffect(() => {
-        if (snippetToEdit) {
-            setForm({
-                title: snippetToEdit.title,
-                language: snippetToEdit.language,
-                description: snippetToEdit.description ?? "",
-                code: snippetToEdit.code,
-                tags: snippetToEdit.tags.join(", "), // array → string comma-separated
-            })
-        } else {
-            // reset form kalau balik ke mode tambah
-            setForm({ title: "", language: "typescript", description: "", code: "", tags: "" })
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose()
         }
-    }, [snippetToEdit, isOpen])
+        document.addEventListener("keydown", handleKeyDown)
+        return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [onClose])
 
     if (!isOpen) return null;
 
@@ -102,10 +101,12 @@ export default function SnippetModal({
         <div
             className="fixed inset-0 z-50 flex items-center justify-center"
             style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+            onClick={onClose}
         >
             <div
                 className="relative flex flex-col gap-4 rounded-xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto"
                 style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Header — judul berubah sesuai mode */}
                 <div className="flex items-center justify-between">

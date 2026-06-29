@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 />
             </Suspense>
             {children}
-            <SnippetModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+            <SnippetModal key="create" isOpen={modalOpen} onClose={() => setModalOpen(false)} />
         </SidebarContext.Provider>
     )
 }

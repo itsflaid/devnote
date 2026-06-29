@@ -45,7 +45,7 @@ export default function Topbar({ onNewSnippet, onToggleSidebar }: TopbarProps) {
         startTransition(() => {
             router.replace(`/dashboard?${params.toString()}`)
         })
-    }, 400)
+    }, 150)
 
     const handleSearch = (val: string) => {
         setSearchQuery(val)

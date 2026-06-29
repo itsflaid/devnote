@@ -49,8 +49,8 @@ export default function SnippetDetail({
     const [deleting, setDeleting] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
-    const [isFavorite, setIsFavorite] = useState(snippet.isFavorite)
-    const [isPublic, setIsPublic] = useState(snippet.isPublic)
+    const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null)
+    const [optimisticPub, setOptimisticPub] = useState<boolean | null>(null)
 
     const [colOpen, setColOpen] = useState(false)
     const [collections, setCollections] = useState<Collection[]>([])
@@ -65,6 +65,9 @@ export default function SnippetDetail({
     const [codeCopied, setCodeCopied] = useState(false)
     const [markdownMode, setMarkdownMode] = useState<"raw" | "preview">("raw")
 
+    const isFavorite = optimisticFav ?? favoriteIds.has(snippet.id)
+    const isPublic = optimisticPub ?? publicIds.has(snippet.id)
+
     const colRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -76,25 +79,6 @@ export default function SnippetDetail({
         document.addEventListener("click", handleClickOutside)
         return () => document.removeEventListener("click", handleClickOutside)
     }, [])
-
-    useEffect(() => {
-        setCopyCount(snippet.copyCount)
-    }, [snippet.id, snippet.copyCount])
-
-    useEffect(() => {
-        setIsFavorite(favoriteIds.has(snippet.id))
-    }, [snippet.id, favoriteIds])
-
-    useEffect(() => {
-        setIsPublic(publicIds.has(snippet.id))
-    }, [snippet.id, publicIds])
-
-    useEffect(() => {
-        setShareOpen(false)
-        setShareId(snippet.shareId ?? null)
-        setCodeCopied(false)
-        setUrlCopied(false)
-    }, [snippet.id, snippet.shareId])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -151,6 +135,8 @@ export default function SnippetDetail({
         try {
             const res = await fetch(`/api/snippets/${snippet.id}`, { method: "DELETE" })
             if (!res.ok) throw new Error()
+            setConfirmOpen(false)
+            setDeleting(false)
             router.refresh()
         } catch {
             alert("Gagal menghapus note.")
@@ -160,7 +146,7 @@ export default function SnippetDetail({
 
     const handleFavorite = async () => {
         const next = !isFavorite
-        setIsFavorite(next)
+        setOptimisticFav(next)
         if (next) incrementFav()
         else decrementFav()
         toggleFavoriteId(snippet.id)
@@ -168,7 +154,7 @@ export default function SnippetDetail({
             const res = await fetch(`/api/snippets/${snippet.id}/favorite`, { method: "POST" })
             if (!res.ok) throw new Error()
         } catch {
-            setIsFavorite(!next)
+            setOptimisticFav(null)
             if (next) decrementFav()
             else incrementFav()
             toggleFavoriteId(snippet.id)
@@ -177,7 +163,7 @@ export default function SnippetDetail({
 
     const handlePublic = async () => {
         const next = !isPublic
-        setIsPublic(next)
+        setOptimisticPub(next)
         if (next) incrementPublicCount()
         else decrementPublicCount()
         togglePublicId(snippet.id)
@@ -185,7 +171,7 @@ export default function SnippetDetail({
             const res = await fetch(`/api/snippets/${snippet.id}/publish`, { method: "POST" })
             if (!res.ok) throw new Error()
         } catch {
-            setIsPublic(!next)
+            setOptimisticPub(null)
             if (next) decrementPublicCount()
             else incrementPublicCount()
             togglePublicId(snippet.id)
