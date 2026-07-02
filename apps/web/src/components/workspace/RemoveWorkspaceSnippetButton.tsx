@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { trpc } from "@/lib/trpc"
 
 interface RemoveWorkspaceSnippetButtonProps {
   workspaceId: number
@@ -16,6 +17,7 @@ export default function RemoveWorkspaceSnippetButton({
 }: RemoveWorkspaceSnippetButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const removeMutation = trpc.workspace.snippets.remove.useMutation()
 
   const removeSnippet = async () => {
     const ok = window.confirm(
@@ -27,16 +29,10 @@ export default function RemoveWorkspaceSnippetButton({
     setLoading(true)
 
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/snippets/${snippetId}`, {
-        method: "DELETE",
-      })
-
-      if (!res.ok) {
-        alert("Gagal remove note dari workspace")
-        return
-      }
-
+      await removeMutation.mutateAsync({ workspaceId, snippetId })
       router.refresh()
+    } catch {
+      alert("Gagal remove note dari workspace")
     } finally {
       setLoading(false)
     }

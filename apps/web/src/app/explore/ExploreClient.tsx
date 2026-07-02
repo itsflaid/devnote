@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback, useTransition, useRef } from "react"
+import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { trpc } from "@/lib/trpc"
 import ExploreSnippetCard, { PublicSnippet } from "@/components/explore/ExploreSnippetCard"
 import ExplorePagination from "@/components/explore/ExplorePagination"
 import ExploreTopbar from "@/components/explore/ExploreTopbar"
@@ -41,15 +42,15 @@ export default function ExploreClient() {
     const [search, setSearch] = useState(searchParams.get("search") ?? "")
     const [page, setPage] = useState(Number(searchParams.get("page") ?? "1"))
 
-    const [snippets, setSnippets] = useState<PublicSnippet[]>([])
-    const [total, setTotal] = useState(0)
-    const [totalPages, setTotalPages] = useState(1)
-    const [loading, setLoading] = useState(true)
+    const { data: exploreData, isLoading: loading } = trpc.snippet.explore.useQuery({ sort: sort as "newest" | "oldest" | "popular" | "most-copied", lang: lang || undefined, search: search || undefined, page })
+
+    const snippets: PublicSnippet[] = exploreData?.snippets ?? []
+    const total = exploreData?.total ?? 0
+    const totalPages = exploreData?.totalPages ?? 1
 
     const [showMobileFilter, setShowMobileFilter] = useState(false)
-    const fetchedRef = useRef(false)
 
-    const pushParams = useCallback((overrides: Record<string, string>) => {
+    const pushParams = (overrides: Record<string, string>) => {
         const params = new URLSearchParams()
         const merged = { sort, lang, search, page: String(page), ...overrides }
 
@@ -61,43 +62,13 @@ export default function ExploreClient() {
         startTransition(() => {
             router.replace(`/explore?${params.toString()}`, { scroll: false })
         })
-    }, [sort, lang, search, page, router])
+    }
 
-    const fetchSnippets = useCallback(async (params: {
-        sort: string; lang: string; search: string; page: number
-    }) => {
-        setLoading(true)
-        try {
-            const q = new URLSearchParams()
-            q.set("sort", params.sort)
-            if (params.lang) q.set("lang", params.lang)
-            if (params.search) q.set("search", params.search)
-            q.set("page", String(params.page))
-
-            const res = await fetch(`/api/explore?${q.toString()}`)
-            const data = await res.json()
-
-            setSnippets(data.snippets || [])
-            setTotal(data.total || 0)
-            setTotalPages(data.totalPages || 1)
-        } finally {
-            setLoading(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (fetchedRef.current) return
-        fetchedRef.current = true
-        fetchSnippets({ sort, lang, search, page })
-    }, [fetchSnippets, sort, lang, search, page])
-
-    // Handlers
     const handleSort = (val: string) => {
         setSort(val)
         setPage(1)
         pushParams({ sort: val, page: "1" })
         setShowMobileFilter(false)
-        fetchSnippets({ sort: val, lang, search, page: 1 })
     }
 
     const handleLang = (val: string) => {
@@ -105,27 +76,22 @@ export default function ExploreClient() {
         setPage(1)
         pushParams({ lang: val, page: "1" })
         setShowMobileFilter(false)
-        fetchSnippets({ sort, lang: val, search, page: 1 })
     }
 
     const handleSearch = (val: string) => {
         setSearch(val)
         setPage(1)
         pushParams({ search: val, page: "1" })
-        fetchSnippets({ sort, lang, search: val, page: 1 })
     }
 
     const handlePage = (val: number) => {
         setPage(val)
         pushParams({ page: String(val) })
         window.scrollTo({ top: 0, behavior: "smooth" })
-        fetchSnippets({ sort, lang, search, page: val })
     }
 
     const handleLikeToggle = (id: number, liked: boolean, count: number) => {
-        setSnippets(prev =>
-            prev.map(s => s.id === id ? { ...s, likedByMe: liked, likeCount: count } : s)
-        )
+        // handled by React Query cache, no manual state needed
     }
 
     return (

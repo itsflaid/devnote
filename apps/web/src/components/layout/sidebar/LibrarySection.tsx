@@ -12,6 +12,7 @@ import {
 
 import { useAppStore } from "@/lib/store"
 import { useSidebarStore } from "@/lib/sidebarStore"
+import { trpc } from "@/lib/trpc"
 import SidebarSection from "./SidebarSection"
 import NavItem from "./NavItem"
 
@@ -66,19 +67,20 @@ export default function LibrarySection({
     setPublicCount(totalPublic)
   }, [totalPublic, setPublicCount])
 
-  useEffect(() => {
-    fetch("/api/snippets?filter=favorites")
-      .then((r) => r.json())
-      .then((d) => setFavoriteIds((d.snippets ?? []).map((s: { id: number }) => s.id)))
-      .catch(console.error)
-  }, [setFavoriteIds])
+  const { data: favSnippets } = trpc.snippet.list.useQuery({ filter: "favorites" })
+  const { data: pubSnippets } = trpc.snippet.list.useQuery({ filter: "public" })
 
   useEffect(() => {
-    fetch("/api/snippets?filter=public")
-      .then((r) => r.json())
-      .then((d) => setPublicIds((d.snippets ?? []).map((s: { id: number }) => s.id)))
-      .catch(console.error)
-  }, [setPublicIds])
+    if (favSnippets) {
+      setFavoriteIds(favSnippets.map((s: { id: number }) => s.id))
+    }
+  }, [favSnippets, setFavoriteIds])
+
+  useEffect(() => {
+    if (pubSnippets) {
+      setPublicIds(pubSnippets.map((s: { id: number }) => s.id))
+    }
+  }, [pubSnippets, setPublicIds])
 
   useEffect(() => {
     router.prefetch("/dashboard")

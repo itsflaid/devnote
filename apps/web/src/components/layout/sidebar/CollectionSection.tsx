@@ -13,6 +13,7 @@ import {
 
 import { useAppStore } from "@/lib/store"
 import { useSidebarStore } from "@/lib/sidebarStore"
+import { trpc } from "@/lib/trpc"
 import SidebarSection from "./SidebarSection"
 
 interface Collection {
@@ -35,20 +36,24 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
 
   const activeCollection = searchParams.get("collection")
 
+  const createCollection = trpc.collection.create.useMutation()
+  const renameCollection = trpc.collection.rename.useMutation()
+  const deleteCollection = trpc.collection.delete.useMutation()
+  const { data: collectionsData } = trpc.collection.list.useQuery()
+
   const [collections, setCollections] = useState<Collection[]>([])
+  useEffect(() => {
+    if (collectionsData) {
+      setCollections(collectionsData as Collection[])
+    }
+  }, [collectionsData])
+
   const [newColName, setNewColName] = useState("")
   const [addingCol, setAddingCol] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editingName, setEditingName] = useState("")
   const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null)
-
-  useEffect(() => {
-    fetch("/api/collections")
-      .then((r) => r.json())
-      .then((d) => setCollections(d.collections ?? []))
-      .catch(console.error)
-  }, [])
 
   useEffect(() => {
     collections.forEach((col) => {
@@ -69,15 +74,9 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   const handleAddCollection = async () => {
     if (!newColName.trim()) return
 
-    const res = await fetch("/api/collections", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newColName.trim() }),
-    })
+    const data = await createCollection.mutateAsync({ name: newColName.trim() })
 
-    const data = await res.json()
-
-    setCollections((prev) => [{ ...data.collection, _count: { snippets: 0 } }, ...prev])
+    setCollections((prev) => [{ ...data, _count: { snippets: 0 } }, ...prev])
     setNewColName("")
     setAddingCol(false)
   }
@@ -85,11 +84,7 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   const handleRename = async (id: number) => {
     if (!editingName.trim()) return
 
-    await fetch(`/api/collections/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editingName.trim() }),
-    })
+    await renameCollection.mutateAsync({ id, name: editingName.trim() })
 
     setCollections((prev) =>
       prev.map((c) => (c.id === id ? { ...c, name: editingName.trim() } : c))
@@ -99,7 +94,7 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   }
 
   const handleDelete = async (id: number) => {
-    await fetch(`/api/collections/${id}`, { method: "DELETE" })
+    await deleteCollection.mutateAsync({ id })
 
     setCollections((prev) => prev.filter((c) => c.id !== id))
     setMenuOpenId(null)

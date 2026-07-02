@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faCopy,
@@ -57,13 +58,30 @@ export default function WorkspaceSettingsModal({
 }: WorkspaceSettingsModalProps) {
   const router = useRouter()
   const isOwner = role === "OWNER"
+  const updateWorkspace = trpc.workspace.update.useMutation()
+  const regenerateInviteMutation = trpc.workspace.regenerateInvite.useMutation()
+  const deleteWorkspace = trpc.workspace.delete.useMutation()
+  const updateMemberRole = trpc.workspace.members.updateRole.useMutation()
+  const transferOwnership = trpc.workspace.members.transferOwnership.useMutation()
+  const removeMember = trpc.workspace.members.remove.useMutation()
   const [name, setName] = useState(workspaceName)
   const [workspaceDescription, setWorkspaceDescription] = useState(
     description ?? ""
   )
   const [currentInviteCode, setCurrentInviteCode] = useState(inviteCode)
+
+  const { data: membersData, isLoading: loadingMembers } = trpc.workspace.members.list.useQuery(
+    { workspaceId },
+    { enabled: isOwner }
+  )
   const [members, setMembers] = useState<WorkspaceMember[]>([])
-  const [loadingMembers, setLoadingMembers] = useState(isOwner)
+
+  useEffect(() => {
+    if (membersData) {
+      setMembers(membersData as WorkspaceMember[])
+    }
+  }, [membersData])
+
   const [savingDetails, setSavingDetails] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [updatingId, setUpdatingId] = useState<number | null>(null)
@@ -72,45 +90,6 @@ export default function WorkspaceSettingsModal({
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const [error, setError] = useState("")
   const [notice, setNotice] = useState("")
-
-  useEffect(() => {
-    if (!isOwner) {
-      return
-    }
-
-    const controller = new AbortController()
-
-    fetch(`/api/workspaces/${workspaceId}/members`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.message || "Gagal memuat anggota workspace")
-        }
-
-        setMembers(data.members)
-      })
-      .catch((loadError) => {
-        if (loadError instanceof DOMException && loadError.name === "AbortError") {
-          return
-        }
-
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Gagal memuat anggota workspace"
-        )
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setLoadingMembers(false)
-        }
-      })
-
-    return () => controller.abort()
-  }, [isOwner, workspaceId])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -148,22 +127,13 @@ export default function WorkspaceSettingsModal({
     setSavingDetails(true)
 
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: workspaceDescription.trim(),
-        }),
+      const data = await updateWorkspace.mutateAsync({
+        id: workspaceId,
+        name: name.trim(),
+        description: workspaceDescription.trim(),
       })
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "Gagal menyimpan workspace")
-      }
-
-      setName(data.workspace.name)
-      setWorkspaceDescription(data.workspace.description ?? "")
+      setName(data.name)
+      setWorkspaceDescription(data.description ?? "")
       setNotice("Detail workspace disimpan.")
       router.refresh()
     } catch (saveError) {
@@ -182,15 +152,7 @@ export default function WorkspaceSettingsModal({
     setRegeneratingCode(true)
 
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}`, {
-        method: "PATCH",
-      })
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "Gagal membuat kode baru")
-      }
-
+      const data = await regenerateInviteMutation.mutateAsync({ id: workspaceId })
       setCurrentInviteCode(data.inviteCode)
       setNotice("Kode undangan baru sudah aktif.")
       router.refresh()
@@ -232,17 +194,7 @@ export default function WorkspaceSettingsModal({
     )
 
     try {
-      const response = await fetch(`/api/workspaces/${workspaceId}/members`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberId, role: nextRole }),
-      })
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "Gagal mengubah role")
-      }
-
+      await updateMemberRole.mutateAsync({ workspaceId, memberId, role: nextRole })
       setNotice("Role anggota diperbarui.")
     } catch (updateError) {
       setMembers(previousMembers)
@@ -266,20 +218,10 @@ export default function WorkspaceSettingsModal({
 
     try {
       if (pendingAction.type === "remove") {
-        const response = await fetch(
-          `/api/workspaces/${workspaceId}/members`,
-          {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ memberId: pendingAction.member.id }),
-          }
-        )
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.message || "Gagal mengeluarkan anggota")
-        }
-
+        await removeMember.mutateAsync({
+          workspaceId,
+          memberId: pendingAction.member.id,
+        })
         setMembers((current) =>
           current.filter((member) => member.id !== pendingAction.member.id)
         )
@@ -290,20 +232,10 @@ export default function WorkspaceSettingsModal({
       }
 
       if (pendingAction.type === "transfer") {
-        const response = await fetch(
-          `/api/workspaces/${workspaceId}/members`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ memberId: pendingAction.member.id }),
-          }
-        )
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.message || "Gagal memindahkan ownership")
-        }
-
+        await transferOwnership.mutateAsync({
+          workspaceId,
+          memberId: pendingAction.member.id,
+        })
         setPendingAction(null)
         onClose()
         router.refresh()
@@ -311,30 +243,13 @@ export default function WorkspaceSettingsModal({
       }
 
       if (pendingAction.type === "leave") {
-        const response = await fetch(
-          `/api/workspaces/${workspaceId}/members`,
-          { method: "DELETE" }
-        )
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.message || "Gagal keluar dari workspace")
-        }
-
+        await removeMember.mutateAsync({ workspaceId })
         router.push("/workspaces")
         router.refresh()
         return
       }
 
-      const response = await fetch(`/api/workspaces/${workspaceId}`, {
-        method: "DELETE",
-      })
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || "Gagal menghapus workspace")
-      }
-
+      await deleteWorkspace.mutateAsync({ id: workspaceId })
       router.push("/workspaces")
       router.refresh()
     } catch (actionError) {

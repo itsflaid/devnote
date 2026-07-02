@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from "react"
+import { trpc } from "@/lib/trpc"
 
 export default function CopyButton({ 
     code, 
@@ -9,26 +10,17 @@ export default function CopyButton({
 }: { 
     code: string
     snippetId: number
-    onCopy?: () => void  // callback opsional — dipanggil setelah copy berhasil
+    onCopy?: () => void
 }) {
     const [copied, setCopied] = useState(false)
+    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
 
     const handleCopy = async () => {
-        // salin kode ke clipboard browser
         navigator.clipboard.writeText(code)
-        
-        // ubah tampilan tombol jadi "Tersalin!" selama 2 detik
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
-
-        // beritahu parent bahwa copy sudah terjadi
-        // pakai ?. supaya tidak error kalau onCopy tidak dikirim
         onCopy?.()
-
-        // hit API di background — tidak perlu di-await karena
-        // UI sudah update duluan (optimistic update)
-        // .catch(() => {}) supaya error API tidak bikin app crash
-        fetch(`/api/snippets/${snippetId}/copy`, { method: "POST" }).catch(() => {})
+        incrementCopy.mutate({ id: snippetId })
     }
 
     return (

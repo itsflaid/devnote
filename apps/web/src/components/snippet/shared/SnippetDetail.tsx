@@ -7,6 +7,7 @@ import MarkdownViewer from "./MarkdownViewer"
 import type { Snippet } from "./types"
 import { getLang } from "@/lib/languages"
 import { useAppStore } from "@/lib/store"
+import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFolderPlus, faCheck, faCopy, faLink, faLinkSlash, faEllipsisVertical, faCode, faEye } from "@fortawesome/free-solid-svg-icons"
 
@@ -45,6 +46,14 @@ export default function SnippetDetail({
         togglePublicId,
         publicIds,
     } = useAppStore()
+
+    const utils = trpc.useUtils()
+    const deleteMutation = trpc.snippet.delete.useMutation()
+    const toggleFavoriteMutation = trpc.snippet.toggleFavorite.useMutation()
+    const togglePublishMutation = trpc.snippet.togglePublish.useMutation()
+    const toggleShareMutation = trpc.snippet.toggleShare.useMutation()
+    const addSnippetMutation = trpc.collection.addSnippet.useMutation()
+    const removeSnippetMutation = trpc.collection.removeSnippet.useMutation()
 
     const [deleting, setDeleting] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
@@ -93,13 +102,12 @@ export default function SnippetDetail({
     useEffect(() => {
         if (!colOpen) return
         Promise.all([
-            fetch("/api/collections").then(r => r.json()),
-            fetch(`/api/snippets/${snippet.id}/collections`).then(r => r.json())
-        ])
-            .then(([allCols, assignedCols]) => {
-                setCollections(allCols.collections ?? [])
-                setAssignedIds(assignedCols.map((c: { id: number }) => c.id))
-            })
+            utils.collection.list.fetch(),
+            utils.snippet.getCollections.fetch({ id: snippet.id })
+        ]).then(([allCols, assignedCols]) => {
+            setCollections(allCols ?? [])
+            setAssignedIds(assignedCols.map((c: { id: number }) => c.id))
+        })
     }, [colOpen, snippet.id])
 
     const handleToggleCollection = async (colId: number) => {
@@ -108,11 +116,11 @@ export default function SnippetDetail({
             isAssigned ? prev.filter(id => id !== colId) : [...prev, colId]
         )
         try {
-            await fetch(`/api/collections/${colId}/snippets`, {
-                method: isAssigned ? "DELETE" : "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ snippetId: snippet.id })
-            })
+            if (isAssigned) {
+                await removeSnippetMutation.mutateAsync({ id: colId, snippetId: snippet.id })
+            } else {
+                await addSnippetMutation.mutateAsync({ id: colId, snippetId: snippet.id })
+            }
         } catch (error) {
             setAssignedIds(prev =>
                 isAssigned ? [...prev, colId] : prev.filter(id => id !== colId)
@@ -133,8 +141,7 @@ export default function SnippetDetail({
     const handleDelete = async () => {
         setDeleting(true)
         try {
-            const res = await fetch(`/api/snippets/${snippet.id}`, { method: "DELETE" })
-            if (!res.ok) throw new Error()
+            await deleteMutation.mutateAsync({ id: snippet.id })
             setConfirmOpen(false)
             setDeleting(false)
             router.refresh()
@@ -151,8 +158,8 @@ export default function SnippetDetail({
         else decrementFav()
         toggleFavoriteId(snippet.id)
         try {
-            const res = await fetch(`/api/snippets/${snippet.id}/favorite`, { method: "POST" })
-            if (!res.ok) throw new Error()
+            const data = await toggleFavoriteMutation.mutateAsync({ id: snippet.id })
+            setOptimisticFav(data.isFavorite)
         } catch {
             setOptimisticFav(null)
             if (next) decrementFav()
@@ -168,8 +175,8 @@ export default function SnippetDetail({
         else decrementPublicCount()
         togglePublicId(snippet.id)
         try {
-            const res = await fetch(`/api/snippets/${snippet.id}/publish`, { method: "POST" })
-            if (!res.ok) throw new Error()
+            const data = await togglePublishMutation.mutateAsync({ id: snippet.id })
+            setOptimisticPub(data.isPublic)
         } catch {
             setOptimisticPub(null)
             if (next) decrementPublicCount()
@@ -186,10 +193,8 @@ export default function SnippetDetail({
 
         setShareLoading(true)
         try {
-            const res = await fetch(`/api/snippets/${snippet.id}/share`, { method: "POST" })
-            const data = await res.json()
+            const data = await toggleShareMutation.mutateAsync({ id: snippet.id })
             setShareId(data.shareId)
-            // FIX: buka modal di render cycle berikutnya setelah shareId ke-commit
             setTimeout(() => setShareOpen(true), 0)
         } catch {
             console.error("Gagal membuat share link")
@@ -215,8 +220,8 @@ export default function SnippetDetail({
 
     const handleUnshare = async () => {
         try {
-            await fetch(`/api/snippets/${snippet.id}/share`, { method: "POST" })
-            setShareId(null)
+            const data = await toggleShareMutation.mutateAsync({ id: snippet.id })
+            setShareId(data.shareId)
             setShareOpen(false)
         } catch {
             console.error("Gagal unshare")

@@ -3,9 +3,11 @@
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
 import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
+import { trpc } from "@/lib/trpc"
 
 export default function JoinWorkspaceModal() {
   const router = useRouter()
+  const joinWorkspace = trpc.workspace.join.useMutation()
 
   const [inviteCode, setInviteCode] = useState("")
   const [loading, setLoading] = useState(false)
@@ -47,23 +49,9 @@ export default function JoinWorkspaceModal() {
     setLoading(true)
 
     try {
-      const res = await fetch("/api/workspaces/join", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inviteCode: inviteCode.trim(),
-        }),
+      const data = await joinWorkspace.mutateAsync({
+        inviteCode: inviteCode.trim(),
       })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Gagal gabung workspace")
-        return
-      }
-
       router.refresh()
       router.push(`/workspaces/${data.workspace.id}`)
     } catch {
