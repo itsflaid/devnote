@@ -6,6 +6,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { LANGUAGE_OPTIONS } from "@/lib/languages"
 import { type Snippet } from "@/components/snippet/shared/types"
+import { trpc } from "@/lib/trpc"
 
 interface SnippetModalProps {
     isOpen: boolean;
@@ -36,6 +37,8 @@ export default function SnippetModal({
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const createSnippet = trpc.snippet.create.useMutation();
+    const updateSnippet = trpc.snippet.update.useMutation();
 
     const isEditMode = !!snippetToEdit;
 
@@ -71,23 +74,14 @@ export default function SnippetModal({
             .map((t) => t.trim())
             .filter(Boolean);
 
+        const input = { title: form.title, language: form.language, description: form.description, code: form.code, tags, workspaceId }
+
         try {
-            // mode edit → PUT ke /api/snippets/:id
-            // mode tambah → POST ke /api/snippets
-            const res = await fetch(
-                isEditMode ? `/api/snippets/${snippetToEdit.id}` : "/api/snippets",
-                {
-                    method: isEditMode ? "PUT" : "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...form, tags, workspaceId }),
-                }
-            );
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || data.message || "Gagal menyimpan note.");
+            if (isEditMode && snippetToEdit) {
+                await updateSnippet.mutateAsync({ ...input, id: snippetToEdit.id })
+            } else {
+                await createSnippet.mutateAsync(input)
             }
-
             router.refresh();
             onClose();
         } catch (err) {

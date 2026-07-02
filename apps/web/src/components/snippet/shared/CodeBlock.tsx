@@ -1,22 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { trpc } from "@/lib/trpc"
 
 export default function CodeBlock({ code, language }: {
     code: string
     language: string
 }) {
     const [html, setHtml] = useState('')
+    const highlight = trpc.highlight.run.useMutation()
 
     useEffect(() => {
-        fetch('/api/highlight', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, language })
+        highlight.mutate({ code, language }, {
+            onSuccess: (data) => setHtml(data.html),
+            onError: () => setHtml(''),
         })
-            .then(res => res.json())
-            .then(data => setHtml(data.html))
-            .catch(() => setHtml('')) // fallback
     }, [code, language])
 
     // Fallback plain text
