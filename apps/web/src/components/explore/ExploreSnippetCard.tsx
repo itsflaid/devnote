@@ -16,14 +16,14 @@ export interface PublicSnippet {
     code: string
     language: string
     copyCount: number
-    createdAt: string
+    createdAt: Date | string
     tags: string[]
     user: { id: number; name: string; avatar: string | null }
     likeCount: number
     likedByMe: boolean
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: Date | string) {
     const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
     if (diff < 60) return "baru saja"
     if (diff < 3600) return `${Math.floor(diff / 60)} menit yang lalu`
