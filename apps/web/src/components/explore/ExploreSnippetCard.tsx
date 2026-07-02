@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { getLang } from "@/lib/languages"
+import { trpc } from "@/lib/trpc"
 import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
@@ -51,6 +52,8 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
     const [expanded, setExpanded] = useState(false)
     const [liking, setLiking] = useState(false)
     const [copied, setCopied] = useState(false)
+    const toggleLike = trpc.snippet.toggleLike.useMutation()
+    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
 
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -61,8 +64,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
         if (liking) return
         setLiking(true)
         try {
-            const res = await fetch(`/api/snippets/${snippet.id}/like`, { method: "POST" })
-            const data = await res.json()
+            const data = await toggleLike.mutateAsync({ id: snippet.id })
             onLikeToggle(snippet.id, data.liked, data.count)
         } finally {
             setLiking(false)
@@ -74,7 +76,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
         await navigator.clipboard.writeText(snippet.code)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
-        fetch(`/api/snippets/${snippet.id}/copy`, { method: "POST" }).catch(() => {})
+        incrementCopy.mutate({ id: snippet.id })
     }
 
     return (

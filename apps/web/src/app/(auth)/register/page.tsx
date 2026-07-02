@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import {signIn} from "next-auth/react"
+import { trpc } from "@/lib/trpc"
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -12,6 +13,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false)
     const [password, setPassword] = useState("")
     const [confirm, setConfirm] = useState("")
+    const registerMutation = trpc.auth.register.useMutation()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -28,19 +30,14 @@ export default function RegisterPage() {
             return
         }
 
-        const result = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password })
-        })
-
-        if (!result.ok) {
+        try {
+            await registerMutation.mutateAsync({ name, email, password })
+            router.push("/login")
+        } catch {
             setError("Gagal registrasi")
+        } finally {
             setLoading(false)
-            return
         }
-
-        router.push("/login")
     }
 
     return (

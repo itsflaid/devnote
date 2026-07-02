@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
+import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faUser, faCopy, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons"
 import { useSession } from "next-auth/react"
@@ -29,6 +30,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
     const [copied, setCopied] = useState(false)
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
     const lang = getLang(snippet.language)
+    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
 
     const { data: session } = useSession()
 
@@ -38,7 +40,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
             await navigator.clipboard.writeText(snippet.code)
             setCopied(true)
             setCopyCount(c => c + 1)
-            fetch(`/api/snippets/${snippet.id}/copy`, { method: "POST" }).catch(() => {})
+            incrementCopy.mutate({ id: snippet.id })
             setTimeout(() => setCopied(false), 1800)
         } catch {
             const ta = document.createElement("textarea")

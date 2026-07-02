@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowLeft, faCheck, faTriangleExclamation, faPen } from "@fortawesome/free-solid-svg-icons"
 import Image from "next/image"
@@ -80,16 +81,9 @@ export default function ProfilePage() {
     const router = useRouter()
     const [saved, setSaved] = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
-    const [stats, setStats] = useState<Stats | null>(null)
+    const { data: stats } = trpc.userStats.get.useQuery()
 
     const user = session?.user
-
-    useEffect(() => {
-        fetch("/api/user/stats")
-            .then(r => r.json())
-            .then(setStats)
-            .catch(console.error)
-    }, [])
 
     function getInitials(name?: string | null) {
         if (!name) return "U"
