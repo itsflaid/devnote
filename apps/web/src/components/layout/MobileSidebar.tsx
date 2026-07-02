@@ -1,49 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSidebar } from "./DashboardLayout"
 import SidebarClient from "./sidebar/SidebarClient"
-
-interface WorkspaceNavItem {
-    id: number
-    name: string
-    role: "OWNER" | "EDITOR" | "VIEWER"
-    snippetsCount: number
-}
-
-interface SidebarData {
-    totalSnippets: number
-    totalCopies: number
-    totalFavorites: number
-    totalPublic: number
-    workspaceSnippetsCount: number
-    workspaces: WorkspaceNavItem[]
-    tags: { name: string; count: number }[]
-}
+import { trpc } from "@/lib/trpc"
 
 export default function MobileSidebar() {
     const { sidebarOpen, setSidebarOpen } = useSidebar()
-    const [data, setData] = useState<SidebarData | null>(null)
-
-    useEffect(() => {
-        if (!sidebarOpen) return
-
-        fetch("/api/sidebar")
-            .then((res) => res.json())
-            .then((result) => {
-                setData({
-                    totalSnippets: result.totalSnippets ?? 0,
-                    totalCopies: result.totalCopies ?? 0,
-                    totalFavorites: result.totalFavorites ?? 0,
-                    totalPublic: result.totalPublic ?? 0,
-                    workspaceSnippetsCount: result.workspaceSnippetsCount ?? 0,
-                    workspaces: result.workspaces ?? [],
-                    tags: result.tags ?? [],
-                })
-            })
-            .catch(console.error)
-    }, [sidebarOpen])
+    const { data: sidebarData } = trpc.sidebar.get.useQuery(undefined, {
+        enabled: sidebarOpen,
+    })
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -78,15 +45,15 @@ export default function MobileSidebar() {
                         style={{ width: "280px" }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {data ? (
+                        {sidebarData ? (
                             <SidebarClient
-                                totalSnippets={data.totalSnippets}
-                                totalCopies={data.totalCopies}
-                                totalFavorites={data.totalFavorites}
-                                totalPublic={data.totalPublic}
-                                workspaceSnippetsCount={data.workspaceSnippetsCount}
-                                workspaces={data.workspaces}
-                                tags={data.tags}
+                                totalSnippets={sidebarData.totalSnippets}
+                                totalCopies={sidebarData.totalCopies}
+                                totalFavorites={sidebarData.totalFavorites}
+                                totalPublic={sidebarData.totalPublic}
+                                workspaceSnippetsCount={sidebarData.workspaceSnippetsCount}
+                                workspaces={sidebarData.workspaces}
+                                tags={sidebarData.tags}
                                 onNavigate={() => setSidebarOpen(false)}
                             />
                         ) : (
