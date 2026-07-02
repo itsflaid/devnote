@@ -2,9 +2,11 @@
 
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
+import { trpc } from "@/lib/trpc"
 
 export default function CreateWorkspaceModal() {
   const router = useRouter()
+  const createWorkspace = trpc.workspace.create.useMutation()
 
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
@@ -27,26 +29,12 @@ export default function CreateWorkspaceModal() {
     setLoading(true)
 
     try {
-      const res = await fetch("/api/workspaces", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim(),
-        }),
+      const data = await createWorkspace.mutateAsync({
+        name: name.trim(),
+        description: description.trim(),
       })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Gagal membuat workspace")
-        return
-      }
-
       router.refresh()
-      router.push(`/workspaces/${data.workspace.id}`)
+      router.push(`/workspaces/${data.id}`)
     } catch {
       setError("Terjadi error saat membuat workspace")
     } finally {

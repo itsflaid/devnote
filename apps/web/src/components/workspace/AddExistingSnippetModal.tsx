@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { trpc } from "@/lib/trpc"
 
 interface AvailableSnippet {
   id: number
@@ -24,6 +25,7 @@ export default function AddExistingSnippetModal({
   const [search, setSearch] = useState("")
   const [loadingId, setLoadingId] = useState<number | null>(null)
   const [error, setError] = useState("")
+  const addSnippetMutation = trpc.workspace.snippets.add.useMutation()
 
   const close = () => {
     router.push(`/workspaces/${workspaceId}`)
@@ -44,21 +46,7 @@ export default function AddExistingSnippetModal({
     setLoadingId(snippetId)
 
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/snippets`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ snippetId }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Gagal menambahkan note")
-        return
-      }
-
+      await addSnippetMutation.mutateAsync({ workspaceId, snippetId })
       router.refresh()
       router.push(`/workspaces/${workspaceId}`)
     } catch {
