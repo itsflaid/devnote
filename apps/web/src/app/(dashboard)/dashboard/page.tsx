@@ -72,28 +72,13 @@ async function DashboardContent({
 
       ...(search && {
         OR: [
-          {
-            title: {
-              contains: search,
-            },
-          },
-          {
-            code: {
-              contains: search,
-            },
-          },
-          {
-            description: {
-              contains: search,
-            },
-          },
+          { title: { contains: search } },
+          { description: { contains: search } },
           {
             tags: {
               some: {
                 tag: {
-                  name: {
-                    contains: search,
-                  },
+                  name: { contains: search },
                 },
               },
             },
@@ -107,6 +92,8 @@ async function DashboardContent({
         },
       }),
     },
+
+    ...(search ? { take: 50 } : {}),
 
     orderBy:
       filter === "most-copied"

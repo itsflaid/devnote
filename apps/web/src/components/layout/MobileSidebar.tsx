@@ -5,11 +5,18 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useSidebar } from "./DashboardLayout"
 import SidebarClient from "./sidebar/SidebarClient"
 import { trpc } from "@/lib/trpc"
+import type { SidebarData } from "@/server/services/sidebarData"
 
-export default function MobileSidebar() {
+interface MobileSidebarProps {
+    initialSidebarData?: SidebarData
+}
+
+export default function MobileSidebar({ initialSidebarData }: MobileSidebarProps) {
     const { sidebarOpen, setSidebarOpen } = useSidebar()
     const { data: sidebarData } = trpc.sidebar.get.useQuery(undefined, {
         enabled: sidebarOpen,
+        initialData: initialSidebarData,
+        staleTime: 30_000,
     })
 
     useEffect(() => {
