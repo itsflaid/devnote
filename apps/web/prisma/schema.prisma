@@ -57,6 +57,9 @@ model Snippet {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "snippets_title_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "snippets_description_trgm_idx")
+  @@index([userId], map: "snippets_user_id_idx")
   @@map("snippets")
 }
 
@@ -97,6 +100,7 @@ model Tag {
 
   snippets SnippetTag[]
 
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin, map: "tags_name_trgm_idx")
   @@map("tags")
 }
 
