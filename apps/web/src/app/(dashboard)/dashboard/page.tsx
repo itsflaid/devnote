@@ -72,13 +72,13 @@ async function DashboardContent({
 
       ...(search && {
         OR: [
-          { title: { contains: search } },
-          { description: { contains: search } },
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
           {
             tags: {
               some: {
                 tag: {
-                  name: { contains: search },
+                  name: { contains: search, mode: "insensitive" },
                 },
               },
             },
