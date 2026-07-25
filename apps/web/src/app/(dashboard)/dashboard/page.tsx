@@ -70,30 +70,12 @@ async function DashboardContent({
         },
       }),
 
-      ...(search && {
-        OR: [
-          { title: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
-          {
-            tags: {
-              some: {
-                tag: {
-                  name: { contains: search, mode: "insensitive" },
-                },
-              },
-            },
-          },
-        ],
-      }),
-
       ...(filter === "most-copied" && {
         copyCount: {
           gt: 0,
         },
       }),
     },
-
-    ...(search ? { take: 50 } : {}),
 
     orderBy:
       filter === "most-copied"
@@ -147,8 +129,8 @@ async function DashboardContent({
 
   return (
     <SnippetList
-      key={`${filter ?? ""}-${lang ?? ""}-${tag ?? ""}-${collection ?? ""}-${search ?? ""}`}
-      snippets={snippets}
+        key={`${filter ?? ""}-${lang ?? ""}-${tag ?? ""}-${collection ?? ""}`}
+        snippets={snippets}
     />
   )
 }
