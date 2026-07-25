@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -13,6 +13,13 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false)
     const [password, setPassword] = useState("")
     const [confirm, setConfirm] = useState("")
+    const [showGithubToast, setShowGithubToast] = useState(false)
+
+    useEffect(() => {
+        if (!showGithubToast) return
+        const timer = setTimeout(() => setShowGithubToast(false), 3000)
+        return () => clearTimeout(timer)
+    }, [showGithubToast])
     const registerMutation = trpc.auth.register.useMutation()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -189,7 +196,7 @@ export default function RegisterPage() {
 
                         <button
                             type="button"
-                            onClick={() => { }}
+                            onClick={() => setShowGithubToast(true)}
                             className="flex items-center justify-center gap-2.5 bg-[var(--surface)] border border-[var(--border2)] rounded-lg py-2.5 text-[13px] font-medium text-[var(--text2)] hover:border-blue-500 hover:text-[var(--text)] transition-all"
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -205,6 +212,30 @@ export default function RegisterPage() {
                             Masuk
                         </Link>
                     </p>
+
+                    {showGithubToast && (
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[var(--surface)] border border-[var(--border)] rounded-xl px-5 py-3.5 shadow-2xl flex items-center gap-3 max-w-sm w-[calc(100%-2rem)]">
+                            <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-yellow-400">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="8" x2="12" y2="12" />
+                                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                                </svg>
+                            </div>
+                            <p className="text-[13px] text-[var(--text2)] flex-1">
+                                Login menggunakan GitHub saat ini belum tersedia
+                            </p>
+                            <button
+                                onClick={() => setShowGithubToast(false)}
+                                className="text-[var(--text4)] hover:text-[var(--text)] transition-all shrink-0"
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
 
                 </div>
             </div>
