@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { useSearchParams } from "next/navigation"
 import { type Snippet } from "./shared/types"
 import SnippetDetail from "./shared/SnippetDetail"
 import SnippetExplorer from "./shared/SnippetExplorer"
@@ -23,6 +24,20 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
 
   const isNavigating = useAppStore((s) => s.isNavigating)
   const setIsNavigating = useAppStore((s) => s.setIsNavigating)
+
+  const searchParams = useSearchParams()
+  const searchQuery = searchParams.get("search") ?? ""
+
+  const filteredSnippets = useMemo(() => {
+    if (!searchQuery.trim()) return snippets
+    const q = searchQuery.trim().toLowerCase()
+    return snippets.filter((s) => {
+      if (s.title.toLowerCase().includes(q)) return true
+      if (s.description?.toLowerCase().includes(q)) return true
+      if (s.tags.some((t) => t.toLowerCase().includes(q))) return true
+      return false
+    })
+  }, [snippets, searchQuery])
 
   useEffect(() => {
     setIsNavigating(false)
@@ -80,7 +95,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
       <div className="hidden lg:flex h-full overflow-hidden">
         <SnippetExplorer
           title="Semua Note"
-          items={snippets}
+          items={filteredSnippets}
           getSnippet={(snippet) => snippet}
           getKey={(snippet) => snippet.id}
           listWidthClassName="w-[330px]"
@@ -108,7 +123,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
             >
               <SnippetListHeader
                 title="Semua Note"
-                visibleCount={snippets.length}
+                visibleCount={filteredSnippets.length}
                 totalCount={snippets.length}
                 activeLang={null}
                 filterOpen={false}
@@ -118,7 +133,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
               />
 
               <div className="flex-1 overflow-y-auto p-2">
-                {snippets.map((snippet) => (
+                {filteredSnippets.map((snippet) => (
                   <SnippetCard
                     key={snippet.id}
                     snippet={snippet}
@@ -157,6 +172,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
                   key={mobileSelected.id}
                   snippet={mobileSelected}
                   onEdit={() => setEditSnippet(mobileSelected)}
+                  onDeleted={() => setShowDetail(false)}
                 />
               </div>
             </motion.div>
