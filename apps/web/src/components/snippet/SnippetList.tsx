@@ -157,6 +157,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
                   key={mobileSelected.id}
                   snippet={mobileSelected}
                   onEdit={() => setEditSnippet(mobileSelected)}
+                  onDeleted={() => setShowDetail(false)}
                 />
               </div>
             </motion.div>

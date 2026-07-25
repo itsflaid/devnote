@@ -19,6 +19,7 @@ interface SnippetDetailProps {
     canManageCollections?: boolean
     showPersonalControls?: boolean
     renderAdditionalActions?: (variant: "desktop" | "mobile") => ReactNode
+    onDeleted?: () => void
 }
 
 interface Collection {
@@ -34,6 +35,7 @@ export default function SnippetDetail({
     canManageCollections = true,
     showPersonalControls = true,
     renderAdditionalActions,
+    onDeleted,
 }: SnippetDetailProps) {
     const router = useRouter()
     const {
@@ -144,6 +146,7 @@ export default function SnippetDetail({
             await deleteMutation.mutateAsync({ id: snippet.id })
             setConfirmOpen(false)
             setDeleting(false)
+            onDeleted?.()
             router.refresh()
         } catch {
             alert("Gagal menghapus note.")
