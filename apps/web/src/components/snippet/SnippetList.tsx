@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { type Snippet } from "./shared/types"
 import SnippetDetail from "./shared/SnippetDetail"
@@ -42,6 +42,25 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
   useEffect(() => {
     setIsNavigating(false)
   }, [snippets, setIsNavigating])
+
+  const knownSnippetIdsRef = useRef<Set<number>>(
+    new Set(snippets.map((s) => s.id))
+  )
+
+  // Sama seperti di SnippetExplorer: tampilan mobile di komponen ini punya
+  // state seleksi sendiri (`mobileSelected`), jadi perlu di-sync terpisah
+  // supaya note baru langsung ke-select juga, bukan cuma di versi desktop.
+  useEffect(() => {
+    const currentIds = snippets.map((s) => s.id)
+    const newSnippet = snippets.find((s) => !knownSnippetIdsRef.current.has(s.id))
+
+    if (newSnippet) {
+      setMobileSelected(newSnippet)
+      setShowDetail(true)
+    }
+
+    knownSnippetIdsRef.current = new Set(currentIds)
+  }, [snippets])
 
   if (isNavigating) return <SnippetListSkeleton />
 

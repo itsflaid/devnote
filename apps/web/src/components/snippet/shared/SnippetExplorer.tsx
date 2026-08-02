@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons"
@@ -33,6 +33,26 @@ export default function SnippetExplorer<TItem>({
   const [showMobileDetail, setShowMobileDetail] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [activeLang, setActiveLang] = useState<string | null>(null)
+
+  const knownIdsRef = useRef<Set<number>>(
+    new Set(items.map((item) => getSnippet(item).id))
+  )
+
+  // Kalau ada item baru masuk ke `items` (mis. note baru dibuat), pindahkan
+  // seleksi ke note itu. Tanpa ini, `selectedId` tetap nunjuk ke note lama
+  // karena hanya di-set sekali saat mount, bukan tiap `items` berubah.
+  useEffect(() => {
+    const currentIds = items.map((item) => getSnippet(item).id)
+    const newId = currentIds.find((id) => !knownIdsRef.current.has(id))
+
+    if (newId !== undefined) {
+      setSelectedId(newId)
+      setShowMobileDetail(true)
+    }
+
+    knownIdsRef.current = new Set(currentIds)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items])
 
   const langCounts = items.reduce<Record<string, number>>((acc, item) => {
     const lang = getSnippet(item).language
