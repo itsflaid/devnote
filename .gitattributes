@@ -1,0 +1,5 @@
+# Default: treat semua file sebagai text, normalize ke LF
+* text=auto eol=lf
+
+# File biner — jangan disentuh git line-ending handling
+*.png binary
