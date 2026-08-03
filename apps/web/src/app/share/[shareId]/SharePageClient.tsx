@@ -69,8 +69,8 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                     className="absolute inset-0 opacity-20"
                     style={{
                         backgroundImage: `
-                            linear-gradient(rgba(52, 211, 153, 0.08) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(52, 211, 153, 0.08) 1px, transparent 1px)
+                            linear-gradient(var(--border) 1px, transparent 1px),
+                            linear-gradient(90deg, var(--border) 1px, transparent 1px)
                         `,
                         backgroundSize: '60px 60px'
                     }}

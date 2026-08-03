@@ -71,16 +71,6 @@ export default function JoinPage() {
                 }}
             />
 
-            {/* Radial glow - fixed juga */}
-            <div
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 pointer-events-none
-                           w-[520px] h-[520px] sm:w-[620px] sm:h-[620px] lg:w-[680px] lg:h-[680px]"
-                style={{
-                    background: "radial-gradient(circle, #10b981 0%, transparent 65%)",
-                    filter: "blur(85px)",
-                }}
-            />
-
             {/* Card wrapper */}
             <div className="relative z-10 w-full max-w-[440px] mx-auto px-4">
 
