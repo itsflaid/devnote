@@ -10,10 +10,12 @@ import {
   faPlus,
   faCopy,
   faCheck,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceSettingsModal from "./WorkspaceSettingsModal"
 import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
-import { timeAgo, getInitials } from "@/lib/format"
+import { timeAgo } from "@/lib/format"
+import Avatar from "@/components/Avatar"
 
 interface WorkspaceHeaderProps {
   workspaceId: number
@@ -22,7 +24,7 @@ interface WorkspaceHeaderProps {
   inviteCode: string
   snippetsCount: number
   membersCount: number
-  memberNames: string[]
+  members: { name: string; avatar: string | null }[]
   updatedAt: string
   role: "OWNER" | "EDITOR" | "VIEWER"
   canEdit: boolean
@@ -41,7 +43,7 @@ export default function WorkspaceHeader({
   inviteCode,
   snippetsCount,
   membersCount,
-  memberNames,
+  members,
   updatedAt,
   role,
   canEdit,
@@ -56,11 +58,19 @@ export default function WorkspaceHeader({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const overflowCount = membersCount - memberNames.length
+  const overflowCount = membersCount - members.length
 
   return (
     <section className="shrink-0 border-b border-[var(--border)] bg-[var(--bg)]">
       <div className="flex items-center gap-2 px-3 py-2 sm:px-4">
+        <Link
+          href="/workspaces"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)] md:hidden"
+          aria-label="Kembali ke daftar workspace"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} className="h-3.5 w-3.5" />
+        </Link>
+
         <button
           onClick={() => setOpen((prev) => !prev)}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
@@ -104,13 +114,13 @@ export default function WorkspaceHeader({
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center -space-x-2">
-                    {memberNames.map((memberName, i) => (
-                      <div
-                        key={i}
-                        className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg)] bg-gradient-to-br from-[var(--em-dim)] to-[var(--em)] text-[9px] font-bold text-[#0a0a0a]"
-                      >
-                        {getInitials(memberName)}
-                      </div>
+                    {members.map((member, i) => (
+                      <Avatar
+                        key={`${member.name}-${i}`}
+                        src={member.avatar}
+                        name={member.name}
+                        className="h-6 w-6 text-[9px]"
+                      />
                     ))}
                     {overflowCount > 0 && (
                       <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--bg)] bg-[var(--surface3)] text-[9px] font-semibold text-[var(--text3)]">
