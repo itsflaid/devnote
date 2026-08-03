@@ -3,8 +3,8 @@ interface WorkspaceRoleBadgeProps {
 }
 
 const roleClass = {
-  OWNER: "border-yellow-500/30 bg-yellow-500/10 text-yellow-300",
-  EDITOR: "border-blue-500/30 bg-blue-500/10 text-blue-300",
+  OWNER: "border-[var(--em-border)] bg-[var(--em-faint)] text-[var(--em)]",
+  EDITOR: "border-[var(--em-border)] bg-[var(--em-faint)] text-[var(--em)]",
   VIEWER: "border-[var(--border)] bg-[var(--bg)] text-[var(--text4)]",
 }
 

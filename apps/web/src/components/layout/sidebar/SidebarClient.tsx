@@ -75,7 +75,7 @@ export default function SidebarClient({
   return (
     <aside
       style={{ width: sidebarWidth }}
-      className="dashboard-sidebar relative flex flex-col h-full bg-[#171a18] border-r border-[var(--border)] overflow-y-auto shrink-0"
+      className="dashboard-sidebar relative flex flex-col h-full bg-[var(--surface)] border-r border-[var(--border)] overflow-y-auto shrink-0"
     >
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       <LibrarySection

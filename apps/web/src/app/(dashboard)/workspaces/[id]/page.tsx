@@ -52,6 +52,13 @@ export default async function WorkspaceDetailPage({
           name: true,
           description: true,
           inviteCode: true,
+          updatedAt: true,
+          members: {
+            take: 4,
+            select: {
+              user: { select: { name: true } },
+            },
+          },
           _count: {
             select: {
               snippets: true,
@@ -170,6 +177,8 @@ export default async function WorkspaceDetailPage({
           inviteCode={workspace.inviteCode}
           snippetsCount={workspace._count.snippets}
           membersCount={workspace._count.members}
+          memberNames={workspace.members.map((m) => m.user.name)}
+          updatedAt={workspace.updatedAt.toISOString()}
           role={member.role}
           canEdit={canEdit}
         />

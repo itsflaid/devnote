@@ -2,7 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import WorkspaceCard from "@/components/workspace/WorkspaceCard"
+import WorkspaceRow from "@/components/workspace/WorkspaceRow"
 import CreateWorkspaceModal from "@/components/workspace/CreateWorkspaceModal"
 import JoinWorkspaceModal from "@/components/workspace/JoinWorkspaceModal"
 
@@ -33,6 +33,7 @@ export default async function WorkspacesPage({ searchParams }: PageProps) {
           description: true,
           inviteCode: true,
           createdAt: true,
+          updatedAt: true,
           _count: {
             select: {
               snippets: true,
@@ -56,6 +57,7 @@ export default async function WorkspacesPage({ searchParams }: PageProps) {
     snippetsCount: member.workspace._count.snippets,
     membersCount: member.workspace._count.members,
     createdAt: member.workspace.createdAt.toISOString(),
+    updatedAt: member.workspace.updatedAt.toISOString(),
   }))
 
   return (
@@ -90,9 +92,9 @@ export default async function WorkspacesPage({ searchParams }: PageProps) {
         </div>
 
         {workspaces.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
             {workspaces.map((workspace) => (
-              <WorkspaceCard key={workspace.id} workspace={workspace} />
+              <WorkspaceRow key={workspace.id} workspace={workspace} />
             ))}
           </div>
         ) : (

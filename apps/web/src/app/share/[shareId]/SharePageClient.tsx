@@ -7,7 +7,7 @@ import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
 import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faUser, faCopy, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons"
+import { faUser, faCopy, faCheck, faArrowRight, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 import { useSession } from "next-auth/react"
 
 interface ShareSnippet {
@@ -29,6 +29,7 @@ interface ShareSnippet {
 export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
     const [copied, setCopied] = useState(false)
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
+    const [infoOpen, setInfoOpen] = useState(true)
     const lang = getLang(snippet.language)
     const incrementCopy = trpc.snippet.incrementCopy.useMutation()
 
@@ -69,8 +70,8 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                     className="absolute inset-0 opacity-20"
                     style={{
                         backgroundImage: `
-                            linear-gradient(rgba(52, 211, 153, 0.08) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(52, 211, 153, 0.08) 1px, transparent 1px)
+                            linear-gradient(var(--border) 1px, transparent 1px),
+                            linear-gradient(90deg, var(--border) 1px, transparent 1px)
                         `,
                         backgroundSize: '60px 60px'
                     }}
@@ -126,9 +127,22 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 {lang.label}
                             </span>
 
-                            <h1 className="text-[20px] lg:text-[23px] font-bold tracking-tight text-white leading-tight line-clamp-2">
-                                {snippet.title}
-                            </h1>
+                            <div className="flex items-start justify-between gap-2">
+                                <h1 className="min-w-0 flex-1 text-[20px] lg:text-[23px] font-bold tracking-tight text-white leading-tight line-clamp-2">
+                                    {snippet.title}
+                                </h1>
+
+                                <button
+                                    onClick={() => setInfoOpen(v => !v)}
+                                    className="lg:hidden mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-emerald-500/40 text-emerald-100 transition-all hover:bg-emerald-950 hover:text-emerald-400"
+                                    aria-label={infoOpen ? "Tutup detail" : "Buka detail"}
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faChevronDown}
+                                        className={`h-3 w-3 transition-transform ${infoOpen ? "rotate-180" : ""}`}
+                                    />
+                                </button>
+                            </div>
 
                             {snippet.description && (
                                 <p className="text-emerald-100/70 text-[13px] leading-snug line-clamp-3">
@@ -136,6 +150,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 </p>
                             )}
 
+                            <div className={`${infoOpen ? "flex" : "hidden"} lg:flex flex-col space-y-2 sm:space-y-4 w-full`}>
                             {snippet.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5">
                                     {snippet.tags.map(tag => (
@@ -173,25 +188,28 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 {copyCount.toLocaleString("id-ID")} kali disalin
                             </p>
                         </div>
-
-                        <div className="hidden lg:block mt-auto pt-8">
-                            <Link
-                                href={session ? "/dashboard" : "/"}
-                                className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all 
-                                        text-black font-semibold px-5 py-3 rounded-2xl text-sm w-full"
-                            >
-                                <span>{session ? "Masuk ke Dashboard" : "Gabung ke Devnote"}</span>
-                                <FontAwesomeIcon 
-                                    icon={faArrowRight} 
-                                    className="group-hover:translate-x-1 transition-transform" 
-                                />
-                            </Link>
                         </div>
 
-                        <a href="https://github.com/Mufacoderz" target="_blank" 
-                        className="text-emerald-100/40 text-[10px] text-center mt-6 lg:mt-8">
-                            Shared via <span className="text-emerald-400">devnote</span> — by Muhammad Fadil
-                        </a>
+                        <div className={`${infoOpen ? "block" : "hidden"} lg:block`}>
+                            <div className="hidden lg:block mt-auto pt-8">
+                                <Link
+                                    href={session ? "/dashboard" : "/"}
+                                    className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                            text-black font-semibold px-5 py-3 rounded-2xl text-sm w-full"
+                                >
+                                    <span>{session ? "Masuk ke Dashboard" : "Gabung ke Devnote"}</span>
+                                    <FontAwesomeIcon 
+                                        icon={faArrowRight} 
+                                        className="group-hover:translate-x-1 transition-transform" 
+                                    />
+                                </Link>
+                            </div>
+
+                            <a href="https://github.com/Mufacoderz" target="_blank" 
+                            className="text-emerald-100/40 text-[10px] text-center mt-6 lg:mt-8 block">
+                                Shared via <span className="text-emerald-400">devnote</span> — by Muhammad Fadil
+                            </a>
+                        </div>
                     </div>
 
                     {/* RIGHT PANEL (CODE) */}
