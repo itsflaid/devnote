@@ -7,7 +7,7 @@ import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
 import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faUser, faCopy, faCheck, faArrowRight } from "@fortawesome/free-solid-svg-icons"
+import { faUser, faCopy, faCheck, faArrowRight, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 import { useSession } from "next-auth/react"
 
 interface ShareSnippet {
@@ -29,6 +29,7 @@ interface ShareSnippet {
 export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
     const [copied, setCopied] = useState(false)
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
+    const [infoOpen, setInfoOpen] = useState(true)
     const lang = getLang(snippet.language)
     const incrementCopy = trpc.snippet.incrementCopy.useMutation()
 
@@ -99,17 +100,30 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 </span>
                             </Link>
 
-                            <Link
-                                href={session ? "/dashboard" : "/"}
-                                className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all 
-                                        text-black font-medium px-4 py-1.5 rounded-2xl text-xs whitespace-nowrap"
-                            >
-                                {session? "Dashboard" : "Gabung"}
-                                <FontAwesomeIcon 
-                                    icon={faArrowRight} 
-                                    className="group-hover:translate-x-0.5 transition-transform text-[10px]" 
-                                />
-                            </Link>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setInfoOpen(v => !v)}
+                                    className="lg:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-500/40 text-emerald-100 transition-all hover:bg-emerald-950 hover:text-emerald-400"
+                                    aria-label={infoOpen ? "Tutup detail" : "Buka detail"}
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faChevronDown}
+                                        className={`h-3 w-3 transition-transform ${infoOpen ? "rotate-180" : ""}`}
+                                    />
+                                </button>
+
+                                <Link
+                                    href={session ? "/dashboard" : "/"}
+                                    className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                            text-black font-medium px-4 py-1.5 rounded-2xl text-xs whitespace-nowrap"
+                                >
+                                    {session? "Dashboard" : "Gabung"}
+                                    <FontAwesomeIcon 
+                                        icon={faArrowRight} 
+                                        className="group-hover:translate-x-0.5 transition-transform text-[10px]" 
+                                    />
+                                </Link>
+                            </div>
                         </div>
 
                         <div className="h-px bg-emerald-500/10 mb-1 sm:mb-5" />
@@ -136,6 +150,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 </p>
                             )}
 
+                            <div className={`${infoOpen ? "flex" : "hidden"} lg:flex flex-col space-y-2 sm:space-y-4 w-full`}>
                             {snippet.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1.5">
                                     {snippet.tags.map(tag => (
@@ -173,25 +188,28 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 {copyCount.toLocaleString("id-ID")} kali disalin
                             </p>
                         </div>
-
-                        <div className="hidden lg:block mt-auto pt-8">
-                            <Link
-                                href={session ? "/dashboard" : "/"}
-                                className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all 
-                                        text-black font-semibold px-5 py-3 rounded-2xl text-sm w-full"
-                            >
-                                <span>{session ? "Masuk ke Dashboard" : "Gabung ke Devnote"}</span>
-                                <FontAwesomeIcon 
-                                    icon={faArrowRight} 
-                                    className="group-hover:translate-x-1 transition-transform" 
-                                />
-                            </Link>
                         </div>
 
-                        <a href="https://github.com/Mufacoderz" target="_blank" 
-                        className="text-emerald-100/40 text-[10px] text-center mt-6 lg:mt-8">
-                            Shared via <span className="text-emerald-400">devnote</span> — by Muhammad Fadil
-                        </a>
+                        <div className={`${infoOpen ? "block" : "hidden"} lg:block`}>
+                            <div className="hidden lg:block mt-auto pt-8">
+                                <Link
+                                    href={session ? "/dashboard" : "/"}
+                                    className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                            text-black font-semibold px-5 py-3 rounded-2xl text-sm w-full"
+                                >
+                                    <span>{session ? "Masuk ke Dashboard" : "Gabung ke Devnote"}</span>
+                                    <FontAwesomeIcon 
+                                        icon={faArrowRight} 
+                                        className="group-hover:translate-x-1 transition-transform" 
+                                    />
+                                </Link>
+                            </div>
+
+                            <a href="https://github.com/Mufacoderz" target="_blank" 
+                            className="text-emerald-100/40 text-[10px] text-center mt-6 lg:mt-8 block">
+                                Shared via <span className="text-emerald-400">devnote</span> — by Muhammad Fadil
+                            </a>
+                        </div>
                     </div>
 
                     {/* RIGHT PANEL (CODE) */}
