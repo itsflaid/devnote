@@ -100,30 +100,17 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 </span>
                             </Link>
 
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setInfoOpen(v => !v)}
-                                    className="lg:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-500/40 text-emerald-100 transition-all hover:bg-emerald-950 hover:text-emerald-400"
-                                    aria-label={infoOpen ? "Tutup detail" : "Buka detail"}
-                                >
-                                    <FontAwesomeIcon
-                                        icon={faChevronDown}
-                                        className={`h-3 w-3 transition-transform ${infoOpen ? "rotate-180" : ""}`}
-                                    />
-                                </button>
-
-                                <Link
-                                    href={session ? "/dashboard" : "/"}
-                                    className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all 
-                                            text-black font-medium px-4 py-1.5 rounded-2xl text-xs whitespace-nowrap"
-                                >
-                                    {session? "Dashboard" : "Gabung"}
-                                    <FontAwesomeIcon 
-                                        icon={faArrowRight} 
-                                        className="group-hover:translate-x-0.5 transition-transform text-[10px]" 
-                                    />
-                                </Link>
-                            </div>
+                            <Link
+                                href={session ? "/dashboard" : "/"}
+                                className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                        text-black font-medium px-4 py-1.5 rounded-2xl text-xs whitespace-nowrap"
+                            >
+                                {session? "Dashboard" : "Gabung"}
+                                <FontAwesomeIcon 
+                                    icon={faArrowRight} 
+                                    className="group-hover:translate-x-0.5 transition-transform text-[10px]" 
+                                />
+                            </Link>
                         </div>
 
                         <div className="h-px bg-emerald-500/10 mb-1 sm:mb-5" />
@@ -140,9 +127,22 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 {lang.label}
                             </span>
 
-                            <h1 className="text-[20px] lg:text-[23px] font-bold tracking-tight text-white leading-tight line-clamp-2">
-                                {snippet.title}
-                            </h1>
+                            <div className="flex items-start justify-between gap-2">
+                                <h1 className="min-w-0 flex-1 text-[20px] lg:text-[23px] font-bold tracking-tight text-white leading-tight line-clamp-2">
+                                    {snippet.title}
+                                </h1>
+
+                                <button
+                                    onClick={() => setInfoOpen(v => !v)}
+                                    className="lg:hidden mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-emerald-500/40 text-emerald-100 transition-all hover:bg-emerald-950 hover:text-emerald-400"
+                                    aria-label={infoOpen ? "Tutup detail" : "Buka detail"}
+                                >
+                                    <FontAwesomeIcon
+                                        icon={faChevronDown}
+                                        className={`h-3 w-3 transition-transform ${infoOpen ? "rotate-180" : ""}`}
+                                    />
+                                </button>
+                            </div>
 
                             {snippet.description && (
                                 <p className="text-emerald-100/70 text-[13px] leading-snug line-clamp-3">
