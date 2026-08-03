@@ -18,6 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import WorkspaceRoleBadge from "./WorkspaceRoleBadge"
 import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
+import Avatar from "@/components/Avatar"
 
 type WorkspaceRole = "OWNER" | "EDITOR" | "VIEWER"
 
@@ -510,22 +511,14 @@ function MemberRow({
   onRemove: () => void
   onTransfer: () => void
 }) {
-  const initials = member.user.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-
   return (
     <div className="flex flex-col gap-3 py-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex min-w-0 items-center gap-3">
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--em-border)] bg-[var(--em-soft)] text-xs font-semibold text-[var(--em)]"
-          aria-hidden="true"
-        >
-          {initials || "?"}
-        </div>
+        <Avatar
+          src={member.user.avatar}
+          name={member.user.name}
+          className="h-9 w-9 border border-[var(--em-border)] text-xs"
+        />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{member.user.name}</p>
           <p className="truncate text-xs text-[var(--text4)]">

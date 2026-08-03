@@ -56,7 +56,7 @@ export default async function WorkspaceDetailPage({
           members: {
             take: 4,
             select: {
-              user: { select: { name: true } },
+              user: { select: { name: true, avatar: true } },
             },
           },
           _count: {
@@ -177,7 +177,10 @@ export default async function WorkspaceDetailPage({
           inviteCode={workspace.inviteCode}
           snippetsCount={workspace._count.snippets}
           membersCount={workspace._count.members}
-          memberNames={workspace.members.map((m) => m.user.name)}
+          members={workspace.members.map((m) => ({
+            name: m.user.name,
+            avatar: m.user.avatar,
+          }))}
           updatedAt={workspace.updatedAt.toISOString()}
           role={member.role}
           canEdit={canEdit}
@@ -190,17 +193,17 @@ export default async function WorkspaceDetailPage({
             canEdit={canEdit}
           />
         ) : (
-          <div className="m-4 flex flex-1 items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-6 text-center sm:m-6 sm:p-10">
-            <h3 className="text-lg font-semibold mb-2">
+          <div className="m-4 flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-6 text-center sm:m-6 sm:p-10">
+            <h3 className="text-lg font-semibold">
               Belum ada note di workspace ini
             </h3>
 
-            <p className="text-sm text-[var(--text3)] max-w-md mx-auto mb-5">
+            <p className="mt-2 max-w-md text-sm text-[var(--text3)] mx-auto">
               Tambahkan note baru atau ambil dari library pribadi kamu.
             </p>
 
             {canEdit && (
-              <div className="flex flex-col justify-center gap-2 sm:flex-row">
+              <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row">
                 <Link
                   href={`/workspaces/${workspaceId}?action=add-existing`}
                   className="px-4 py-2 rounded-lg border border-[var(--border)] text-sm text-[var(--text2)] hover:bg-[var(--surface2)] transition-all"
