@@ -70,19 +70,7 @@ body {
   color: var(--text);
 }
 
-.dashboard-sidebar::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 42%;
-  pointer-events: none;
-  background: linear-gradient(
-    28deg,
-    rgba(52, 211, 153, 0.14) 0%,
-    rgba(52, 211, 153, 0.045) 34%,
-    transparent 68%
-  );
-}
+
 
 .markdown-viewer {
   color: var(--text3);
