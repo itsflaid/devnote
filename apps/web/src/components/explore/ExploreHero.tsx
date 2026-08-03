@@ -116,21 +116,6 @@ export default function ExploreHero({ total, loading }: ExploreHeroProps) {
                 }}
             />
 
-            <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[320px] rounded-full pointer-events-none"
-                style={{
-                    background:
-                        "radial-gradient(ellipse at center, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.06) 45%, transparent 70%)",
-                }}
-            />
-            <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[160px] rounded-full pointer-events-none"
-                style={{
-                    background:
-                        "radial-gradient(ellipse at center, rgba(52,211,153,0.13) 0%, transparent 70%)",
-                }}
-            />
-
             <div className="absolute w-[320px] h-[320px] rounded-full bg-white/[0.025] -top-[100px] -left-[80px]" />
             <div className="absolute w-[240px] h-[240px] rounded-full bg-white/[0.02] -bottom-[70px] -right-[60px]" />
 
@@ -143,7 +128,7 @@ export default function ExploreHero({ total, loading }: ExploreHeroProps) {
                 <div className="text-[55px] lg:text-[80px] font-bold tracking-[-2.5px] leading-[1.1] mb-6 min-h-[1.2em]">
                     <span
                         ref={typedRef}
-                        className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-300 bg-clip-text text-transparent"
+                        className="text-emerald-400"
                     />
                     <span className="inline-block w-[4px] h-[0.9em] bg-emerald-400 ml-2 align-middle rounded-sm animate-pulse" />
                 </div>
