@@ -99,9 +99,9 @@ export default function ExploreClient() {
 
             <ExploreTopbar search={search} onSearch={handleSearch} />
 
-            <ExploreHero total={total} loading={loading} />
+            <ExploreHero />
 
-            <div className="max-w-5xl mx-auto w-full px-5 py-8 flex-1">
+            <div className="max-w-6xl mx-auto w-full px-5 py-8 flex-1">
 
                 <div className="flex items-center justify-between mb-6">
 
@@ -158,8 +158,8 @@ export default function ExploreClient() {
                 )}
 
                 {loading ? (
-                    <div className="flex flex-col gap-4">
-                        {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                     </div>
                 ) : snippets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -174,7 +174,7 @@ export default function ExploreClient() {
                 ) : (
                     <AnimatePresence>
 
-                        <div className="flex flex-col gap-4" >
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
                             {snippets.map((s) => (
                                 <motion.div
                                     key={s.id}
@@ -270,7 +270,7 @@ export default function ExploreClient() {
 
 
             <footer className="border-t border-[var(--border)] bg-[var(--surface)] mt-auto">
-                <div className="max-w-5xl mx-auto px-5 py-10">
+                <div className="max-w-6xl mx-auto px-5 py-10">
                     <div className="flex flex-col md:flex-row justify-between gap-8">
                         <div className="max-w-[220px]">
                             <div className="flex items-center gap-2 mb-3">
