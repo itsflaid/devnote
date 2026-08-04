@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 import { Suspense } from "react"
 
 import SnippetList from "@/components/snippet/SnippetList"
@@ -23,6 +24,15 @@ async function DashboardContent({
   const params = await searchParams
   const { lang, tag, filter, collection, search } = params
   const userId = Number(session.user.id)
+
+  const cookieStore = await cookies()
+  const sortPref = cookieStore.get("devnote-sort-order")?.value
+
+  const defaultOrderBy =
+    sortPref === "oldest" ? { createdAt: "asc" as const } :
+    sortPref === "az" ? { title: "asc" as const } :
+    sortPref === "za" ? { title: "desc" as const } :
+    { createdAt: "desc" as const }
 
   const rawSnippets = await prisma.snippet.findMany({
     where: {
@@ -82,9 +92,7 @@ async function DashboardContent({
         ? {
             copyCount: "desc",
           }
-        : {
-            createdAt: "desc",
-          },
+        : defaultOrderBy,
 
     include: {
       tags: {

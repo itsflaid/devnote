@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { LANGUAGE_OPTIONS } from "@/lib/languages"
 import { type Snippet } from "@/components/snippet/shared/types"
 import { trpc } from "@/lib/trpc"
+import { useAppStore } from "@/lib/store"
 
 interface SnippetModalProps {
     isOpen: boolean;
@@ -15,7 +16,7 @@ interface SnippetModalProps {
     snippetToEdit?: Snippet | null;
 }
 
-function getInitialForm(snippetToEdit?: Snippet | null) {
+function getInitialForm(snippetToEdit?: Snippet | null, defaultLanguage: string = "typescript") {
     if (snippetToEdit) {
         return {
             title: snippetToEdit.title,
@@ -25,7 +26,7 @@ function getInitialForm(snippetToEdit?: Snippet | null) {
             tags: snippetToEdit.tags.join(", "),
         }
     }
-    return { title: "", language: "typescript", description: "", code: "", tags: "" }
+    return { title: "", language: defaultLanguage, description: "", code: "", tags: "" }
 }
 
 export default function SnippetModal({
@@ -35,6 +36,7 @@ export default function SnippetModal({
     workspaceId,
 }: SnippetModalProps) {
     const router = useRouter();
+    const defaultLanguage = useAppStore(s => s.prefs.defaultLanguage)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const createSnippet = trpc.snippet.create.useMutation();
@@ -42,7 +44,7 @@ export default function SnippetModal({
 
     const isEditMode = !!snippetToEdit;
 
-    const [form, setForm] = useState(() => getInitialForm(snippetToEdit));
+    const [form, setForm] = useState(() => getInitialForm(snippetToEdit, defaultLanguage));
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

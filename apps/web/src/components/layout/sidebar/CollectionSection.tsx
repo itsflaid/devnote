@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
@@ -15,12 +15,6 @@ import { useAppStore } from "@/lib/store"
 import { useSidebarStore } from "@/lib/sidebarStore"
 import { trpc } from "@/lib/trpc"
 import SidebarSection from "./SidebarSection"
-
-interface Collection {
-  id: number
-  name: string
-  _count: { snippets: number }
-}
 
 interface CollectionSectionProps {
   onNavigate?: () => void
@@ -39,14 +33,10 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   const createCollection = trpc.collection.create.useMutation()
   const renameCollection = trpc.collection.rename.useMutation()
   const deleteCollection = trpc.collection.delete.useMutation()
+  const utils = trpc.useUtils()
   const { data: collectionsData } = trpc.collection.list.useQuery()
 
-  const [collections, setCollections] = useState<Collection[]>([])
-  useEffect(() => {
-    if (collectionsData) {
-      setCollections(collectionsData as Collection[])
-    }
-  }, [collectionsData])
+  const collections = useMemo(() => collectionsData ?? [], [collectionsData])
 
   const [newColName, setNewColName] = useState("")
   const [addingCol, setAddingCol] = useState(false)
@@ -76,7 +66,10 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
 
     const data = await createCollection.mutateAsync({ name: newColName.trim() })
 
-    setCollections((prev) => [{ ...data, _count: { snippets: 0 } }, ...prev])
+    utils.collection.list.setData(undefined, (prev) => [
+      { ...data, _count: { snippets: 0 } },
+      ...(prev ?? []),
+    ])
     setNewColName("")
     setAddingCol(false)
   }
@@ -86,8 +79,8 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
 
     await renameCollection.mutateAsync({ id, name: editingName.trim() })
 
-    setCollections((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, name: editingName.trim() } : c))
+    utils.collection.list.setData(undefined, (prev) =>
+      prev?.map((c) => (c.id === id ? { ...c, name: editingName.trim() } : c)) ?? prev
     )
     setEditingId(null)
     setEditingName("")
@@ -96,7 +89,9 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   const handleDelete = async (id: number) => {
     await deleteCollection.mutateAsync({ id })
 
-    setCollections((prev) => prev.filter((c) => c.id !== id))
+    utils.collection.list.setData(undefined, (prev) =>
+      prev?.filter((c) => c.id !== id) ?? prev
+    )
     setMenuOpenId(null)
 
     if (activeCollection === String(id)) router.replace("/dashboard")

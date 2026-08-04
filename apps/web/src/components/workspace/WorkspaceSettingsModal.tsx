@@ -75,13 +75,8 @@ export default function WorkspaceSettingsModal({
     { workspaceId },
     { enabled: isOwner }
   )
-  const [members, setMembers] = useState<WorkspaceMember[]>([])
-
-  useEffect(() => {
-    if (membersData) {
-      setMembers(membersData as WorkspaceMember[])
-    }
-  }, [membersData])
+  const utils = trpc.useUtils()
+  const members = membersData ?? []
 
   const [savingDetails, setSavingDetails] = useState(false)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
@@ -188,17 +183,17 @@ export default function WorkspaceSettingsModal({
     const previousMembers = members
     resetFeedback()
     setUpdatingId(memberId)
-    setMembers((current) =>
-      current.map((member) =>
+    utils.workspace.members.list.setData({ workspaceId }, (current) =>
+      current?.map((member) =>
         member.id === memberId ? { ...member, role: nextRole } : member
-      )
+      ) ?? current
     )
 
     try {
       await updateMemberRole.mutateAsync({ workspaceId, memberId, role: nextRole })
       setNotice("Role anggota diperbarui.")
     } catch (updateError) {
-      setMembers(previousMembers)
+      utils.workspace.members.list.setData({ workspaceId }, previousMembers)
       setError(
         updateError instanceof Error
           ? updateError.message
@@ -223,8 +218,8 @@ export default function WorkspaceSettingsModal({
           workspaceId,
           memberId: pendingAction.member.id,
         })
-        setMembers((current) =>
-          current.filter((member) => member.id !== pendingAction.member.id)
+        utils.workspace.members.list.setData({ workspaceId }, (current) =>
+          current?.filter((member) => member.id !== pendingAction.member.id) ?? current
         )
         setNotice(`${pendingAction.member.user.name} dikeluarkan dari workspace.`)
         setPendingAction(null)

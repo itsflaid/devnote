@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowLeft, faCheck } from "@fortawesome/free-solid-svg-icons"
 import { useAppStore } from "@/lib/store"
+import { SORTED_LANGUAGE_OPTIONS } from "@/lib/languages"
 
 const SORT_OPTIONS = [
     { value: "newest", label: "Terbaru" },
@@ -25,11 +26,6 @@ const FONT_SIZE_OPTIONS = [
     { value: "12", label: "12px" },
     { value: "13", label: "13px" },
     { value: "14", label: "14px" },
-]
-
-const LANGUAGE_OPTIONS = [
-    "javascript", "typescript", "python", "rust", "go",
-    "java", "php", "css", "html", "sql", "bash"
 ]
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -115,12 +111,15 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (val: boolean) 
 
 export default function PreferencesPage() {
     const router = useRouter()
-    const [saved, setSaved] = useState(false)
     const { prefs, updatePref } = useAppStore()
+    const [toastVisible, setToastVisible] = useState(false)
+    const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const handleSave = () => {
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2000)
+    function handlePrefChange<K extends keyof typeof prefs>(key: K, val: (typeof prefs)[K]) {
+        updatePref(key, val)
+        setToastVisible(true)
+        if (toastTimeout.current) clearTimeout(toastTimeout.current)
+        toastTimeout.current = setTimeout(() => setToastVisible(false), 1500)
     }
 
     return (
@@ -144,21 +143,21 @@ export default function PreferencesPage() {
                     <SelectInput
                         options={SORT_OPTIONS}
                         value={prefs.sortOrder}
-                        onChange={val => updatePref("sortOrder", val as "newest" | "oldest" | "az" | "za")}
+                        onChange={val => handlePrefChange("sortOrder", val as "newest" | "oldest" | "az" | "za")}
                     />
                 </Row>
                 <Row label="Default Language" description="Bahasa yang dipilih saat buat note baru">
                     <SelectInput
-                        options={LANGUAGE_OPTIONS}
+                        options={SORTED_LANGUAGE_OPTIONS}
                         value={prefs.defaultLanguage}
-                        onChange={val => updatePref("defaultLanguage", val)}
+                        onChange={val => handlePrefChange("defaultLanguage", val)}
                     />
                 </Row>
                 <Row label="List View" description="Tampilan kepadatan card note">
                     <SegmentedControl
                         options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]}
                         value={prefs.listView}
-                        onChange={val => updatePref("listView", val as "comfortable" | "compact")}
+                        onChange={val => handlePrefChange("listView", val as "comfortable" | "compact")}
                     />
                 </Row>
             </Section>
@@ -168,35 +167,30 @@ export default function PreferencesPage() {
                     <SelectInput
                         options={THEME_OPTIONS}
                         value={prefs.codeTheme}
-                        onChange={val => updatePref("codeTheme", val)}
+                        onChange={val => handlePrefChange("codeTheme", val)}
                     />
                 </Row>
                 <Row label="Font Size">
                     <SegmentedControl
                         options={FONT_SIZE_OPTIONS}
                         value={prefs.codeFontSize}
-                        onChange={val => updatePref("codeFontSize", val as "12" | "13" | "14")}
+                        onChange={val => handlePrefChange("codeFontSize", val as "12" | "13" | "14")}
                     />
                 </Row>
                 <Row label="Line Numbers" description="Tampilkan nomor baris di code block">
                     <Toggle
                         value={prefs.lineNumbers}
-                        onChange={val => updatePref("lineNumbers", val)}
+                        onChange={val => handlePrefChange("lineNumbers", val)}
                     />
                 </Row>
             </Section>
 
-            <button
-                onClick={handleSave}
-                className={`flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[14px] transition-all
-                    ${saved
-                        ? 'bg-[var(--em-faint)] text-[var(--em)] border border-[var(--em-border)]'
-                        : 'bg-[var(--em)] text-[#0a0a0a] hover:bg-[#2bc48a] hover:shadow-[0_4px_24px_var(--em-glow)]'
-                    }`}
-            >
-                {saved && <FontAwesomeIcon icon={faCheck} className="w-[12px] h-[12px]" />}
-                {saved ? "Tersimpan!" : "Simpan Preferensi"}
-            </button>
+            {toastVisible && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--em-faint)] border border-[var(--em-border)] text-[var(--em)] text-[12px] font-medium z-50">
+                    <FontAwesomeIcon icon={faCheck} className="w-[10px] h-[10px]" />
+                    Tersimpan
+                </div>
+            )}
 
         </div>
     )

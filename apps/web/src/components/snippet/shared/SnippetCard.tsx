@@ -20,11 +20,12 @@ export default function SnippetCard({
 }) {
     const lang = getLang(snippet.language)
     const isFav = useAppStore(s => s.favoriteIds.has(snippet.id))
+    const isCompact = useAppStore(s => s.prefs.listView === "compact")
 
     return (
         <div
             onClick={onClick}
-            className={`relative px-5 py-4 cursor-pointer transition-all border-b border-l-0 border-r-0 border-t-0
+            className={`relative px-5 ${isCompact ? "py-2.5" : "py-4"} cursor-pointer transition-all border-b border-l-0 border-r-0 border-t-0
             ${active
                 ? 'bg-[#171a18] border-b-[var(--border)]'
                 : 'border-b-[var(--border)] hover:bg-[#141715]'
@@ -67,7 +68,7 @@ export default function SnippetCard({
                 </div>
             </div>
 
-            <div className="text-[14px] font-medium mb-[4px] truncate text-[var(--text)]">
+            <div className={`text-[14px] font-medium ${isCompact ? "" : "mb-[4px]"} truncate text-[var(--text)]`}>
                 {snippet.title}
             </div>
 
@@ -77,24 +78,28 @@ export default function SnippetCard({
                 </div>
             )}
 
-            <div className="text-[11px] text-[var(--text4)] truncate mb-[6px]">
-                {snippet.description || snippet.code.split('\n')[0]}
-            </div>
+            {!isCompact && (
+                <div className="text-[11px] text-[var(--text4)] truncate mb-[6px]">
+                    {snippet.description || snippet.code.split('\n')[0]}
+                </div>
+            )}
 
-            <div className="flex gap-1.5 flex-wrap">
-                {snippet.tags.map(tag => (
-                    <span
-                        key={tag}
-                        className={`font-mono text-[9px] px-[7px] py-[1px] rounded-[3px]
-                        ${active
-                            ? 'text-[var(--em-dim)] bg-[var(--em-faint)]'
-                            : 'text-[var(--text4)] bg-[var(--surface3)]'
-                        }`}
-                    >
-                        {tag}
-                    </span>
-                ))}
-            </div>
+            {!isCompact && (
+                <div className="flex gap-1.5 flex-wrap">
+                    {snippet.tags.map(tag => (
+                        <span
+                            key={tag}
+                            className={`font-mono text-[9px] px-[7px] py-[1px] rounded-[3px]
+                            ${active
+                                ? 'text-[var(--em-dim)] bg-[var(--em-faint)]'
+                                : 'text-[var(--text4)] bg-[var(--surface3)]'
+                            }`}
+                        >
+                            {tag}
+                        </span>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

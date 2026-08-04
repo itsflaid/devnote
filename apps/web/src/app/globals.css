@@ -141,6 +141,22 @@ body {
 .markdown-viewer th { color: var(--text2); background: var(--surface2); }
 .markdown-viewer hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
 
+.code-line-numbers pre {
+    counter-reset: line;
+}
+.code-line-numbers .line {
+    counter-increment: line;
+}
+.code-line-numbers .line::before {
+    content: counter(line);
+    display: inline-block;
+    min-width: 2em;
+    margin-right: 1.25em;
+    text-align: right;
+    color: var(--text4);
+    user-select: none;
+}
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
