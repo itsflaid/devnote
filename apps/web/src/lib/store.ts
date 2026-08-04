@@ -36,6 +36,11 @@ interface AppStore {
     updatePref: <K extends keyof Prefs>(key: K, val: Prefs[K]) => void
 }
 
+function syncSortCookie(value: string) {
+    if (typeof document === "undefined") return
+    document.cookie = `devnote-sort-order=${value}; path=/; max-age=31536000; SameSite=Lax`
+}
+
 const DEFAULT_PREFS: Prefs = {
     sortOrder: "newest",
     defaultLanguage: "typescript",
@@ -88,9 +93,12 @@ export const useAppStore = create<AppStore>()(
 
             prefs: DEFAULT_PREFS,
             updatePref: (key, val) =>
-                set((s) => ({
-                    prefs: { ...s.prefs, [key]: val },
-                })),
+                set((s) => {
+                    if (key === "sortOrder") syncSortCookie(val as string)
+                    return {
+                        prefs: { ...s.prefs, [key]: val },
+                    }
+                }),
         }),
         {
             name: "devnote_store",
