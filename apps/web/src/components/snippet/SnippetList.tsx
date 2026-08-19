@@ -50,9 +50,25 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
     })
   }, [localSnippets, searchQuery])
 
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [activeLang, setActiveLang] = useState<string | null>(null)
+
+  const langCounts = filteredSnippets.reduce<Record<string, number>>((acc, s) => {
+    const lang = s.language
+    if (lang) acc[lang] = (acc[lang] ?? 0) + 1
+    return acc
+  }, {})
+
+  const availableLangs = Object.entries(langCounts).sort((a, b) => b[1] - a[1])
+
+  const mobileVisibleSnippets = useMemo(
+    () => (activeLang ? filteredSnippets.filter((s) => s.language === activeLang) : filteredSnippets),
+    [filteredSnippets, activeLang]
+  )
+
   const mobileSelected = useMemo(
-    () => localSnippets.find((s) => s.id === mobileSelectedId) ?? null,
-    [localSnippets, mobileSelectedId]
+    () => mobileVisibleSnippets.find((s) => s.id === mobileSelectedId) ?? mobileVisibleSnippets[0] ?? null,
+    [mobileVisibleSnippets, mobileSelectedId]
   )
 
   useEffect(() => {
@@ -175,17 +191,19 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
             >
               <SnippetListHeader
                 title="Semua Note"
-                visibleCount={filteredSnippets.length}
-                totalCount={snippets.length}
-                activeLang={null}
-                filterOpen={false}
-                availableLangs={[]}
-                onToggleFilter={() => undefined}
-                onToggleLang={() => undefined}
+                visibleCount={mobileVisibleSnippets.length}
+                totalCount={filteredSnippets.length}
+                activeLang={activeLang}
+                filterOpen={filterOpen}
+                availableLangs={availableLangs}
+                onToggleFilter={() => setFilterOpen((prev) => !prev)}
+                onToggleLang={(lang) =>
+                  setActiveLang((prev) => (prev === lang ? null : lang))
+                }
               />
 
               <div className="flex-1 overflow-y-auto p-2">
-                {filteredSnippets.map((snippet) => (
+                {mobileVisibleSnippets.map((snippet) => (
                   <SnippetCard
                     key={snippet.id}
                     snippet={snippet}
@@ -196,6 +214,12 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
                     }}
                   />
                 ))}
+
+                {mobileVisibleSnippets.length === 0 && (
+                  <p className="text-[12px] text-[var(--text4)] text-center py-8">
+                    Tidak ada note yang cocok
+                  </p>
+                )}
               </div>
             </motion.div>
           )}
