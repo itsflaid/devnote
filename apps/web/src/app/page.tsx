@@ -12,13 +12,30 @@ export const metadata: Metadata = {
         "Devnote adalah manajer note kode pribadi untuk developer. Simpan, organisir, cari, dan bagikan note kodemu dengan mudah — semua di satu tempat.",
 
     keywords: [
+        "code snippet manager",
+        "snippet manager online",
         "code note manager",
-        "code note",
+        "aplikasi catatan developer online",
+        "developer note app",
+        "simpan kode online",
+        "code snippet manager gratis",
+        "share code online",
+        "share kode",
+        "explore code",
+        "code snippet manager tim",
+        "alternatif github gist",
+        "tempat simpan kode sering dipakai",
+        "cara organize code snippet rapi",
+        "code snippet manager indonesia",
+        "code snippet organizer",
+        "simpan kode di cloud",
+        "snippet sharing",
+        "kumpulan code snippet",
+        "code library online",
+        "pastebin alternatif",
         "devnote",
         "manajer kode",
-        "simpan note kode",
         "developer tool indonesia",
-        "code note organizer",
     ],
 
     alternates: {
@@ -46,6 +63,26 @@ export default async function HomePage() {
 function WelcomePage() {
     return (
         <div className="min-h-screen relative overflow-hidden bg-[#0a0a0a] flex items-center justify-center">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "SoftwareApplication",
+                        name: "DevNote",
+                        applicationCategory: "DeveloperApplication",
+                        operatingSystem: "Web",
+                        url: "https://devnote-five.vercel.app",
+                        description:
+                            "DevNote adalah code snippet manager gratis untuk developer — simpan, organisir, cari, dan bagikan kode online.",
+                        offers: {
+                            "@type": "Offer",
+                            price: "0",
+                            priceCurrency: "USD",
+                        },
+                    }),
+                }}
+            />
             <div
                 className="absolute inset-0"
                 style={{

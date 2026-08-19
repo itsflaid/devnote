@@ -1,10 +1,10 @@
 # DevNote
 
-> A developer knowledge hub for reusable code, files, and resources.
+> A code snippet manager for developers — save, organize, search, and share code online.
 
-DevNote helps developers save, organize, share, and reuse development resources in one place.
+DevNote helps developers save, organize, and share reusable code snippets — personal or team — in one searchable place.
 
-Whether it's a reusable component, authentication setup, Prisma schema, utility function, configuration file, or even a complete source file, DevNote keeps everything searchable, structured, and easy to access whenever you need it.
+Whether it's a reusable component, auth setup, Prisma schema, utility function, config file, or a complete source file, DevNote keeps everything tidy and easy to access whenever you need it.
 
 ---
 
@@ -20,27 +20,27 @@ Developers constantly reuse the same resources:
 - Configuration files
 - Boilerplate code
 
-Instead of searching old projects, chat history, browser bookmarks, or random folders, DevNote provides a centralized place to manage and reuse development knowledge.
+Instead of digging through old projects, chat history, browser bookmarks, or random folders, DevNote gives you one central place to manage and reuse your development knowledge.
 
 ---
 
 ## Features
 
-### 📁 Personal Library
+### 📁 Personal Code Library
 
-Store snippets, files, configurations, and reusable resources.
+Store snippets, files, configs, and reusable resources. Search, filter by language, and sort the way you like.
 
 ### 🗂️ Collections
 
-Organize resources by topic, technology, or project.
+Organize snippets by topic, technology, or project.
 
-### 🌍 Public Resources
+### 🌍 Public Explore
 
-Explore and discover resources shared by other developers.
+Discover and browse public code snippets from other developers — like, copy, and reuse them.
 
 ### 🔗 Sharing
 
-Share resources instantly using public links.
+Share snippets via public links or a 9-character code.
 
 Perfect for:
 
@@ -49,11 +49,17 @@ Perfect for:
 - Classmates
 - Open source projects
 
-### 🚧 Workspaces *(In Progress)*
+### 👥 Workspaces
 
-Collaborate with multiple developers in shared workspaces.
+Collaborate with multiple developers in shared workspaces and build a team knowledge base.
 
-Build a shared knowledge base with your team.
+### ⚙️ Preferences
+
+Tune your experience: sort order, default language, list density, code theme, font size, and line numbers.
+
+### 📥 File Import
+
+Import code directly from files (.ts, .py, .php, etc.) — language auto-detected.
 
 ### 📅 VS Code Extension *(Planned)*
 
@@ -67,8 +73,10 @@ Access DevNote resources directly inside VS Code.
 - TypeScript
 - TailwindCSS
 - Prisma
-- MySQL
+- PostgreSQL
 - NextAuth.js
+- tRPC
+- React Query
 - Shiki
 - Zustand
 - Framer Motion
@@ -80,23 +88,20 @@ Access DevNote resources directly inside VS Code.
 
 ### ✅ Available
 
-- Personal Resource Library
+- Personal Code Library
 - Collections
-- Public Resources
-- Resource Sharing
-
-### 🚧 In Progress
-
+- Public Explore
+- Sharing (links & codes)
 - Workspaces
+- Preferences
+- File Import
 
 ### 📅 Planned
 
 - VS Code Extension
-- Resource Templates
-- Setup Guides
-- Team Knowledge Base
-- Workspace Permissions
 - API Access
+- Team Knowledge Base
+- Advanced Workspace Permissions
 
 ---
 
@@ -159,6 +164,7 @@ Create a `.env` file:
 
 ```env
 DATABASE_URL=
+DIRECT_URL=
 AUTH_SECRET=
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
@@ -178,3 +184,4 @@ http://localhost:3000
 
 ---
 
+Built by [flaid.my.id](https://flaid.my.id)

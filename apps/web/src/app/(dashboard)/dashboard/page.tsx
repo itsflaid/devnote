@@ -32,7 +32,7 @@ async function DashboardContent({
     sortPref === "oldest" ? { createdAt: "asc" as const } :
     sortPref === "az" ? { title: "asc" as const } :
     sortPref === "za" ? { title: "desc" as const } :
-    { createdAt: "desc" as const }
+    { updatedAt: "desc" as const }
 
   const rawSnippets = await prisma.snippet.findMany({
     where: {
@@ -128,6 +128,7 @@ async function DashboardContent({
       month: "long",
       year: "numeric",
     }),
+    updatedAt: s.updatedAt.toISOString(),
     tags: s.tags.map((t) => t.tag.name),
     workspaces: s.workspaces.map((item) => ({
       id: item.workspace.id,

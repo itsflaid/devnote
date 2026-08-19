@@ -75,7 +75,7 @@ export default function SnippetDetail({
     const [urlCopied, setUrlCopied] = useState(false)
     const [codeCopied, setCodeCopied] = useState(false)
     const [markdownMode, setMarkdownMode] = useState<"raw" | "preview">("raw")
-    const [mobileInfoOpen, setMobileInfoOpen] = useState(false)
+    const [infoOpen, setInfoOpen] = useState(false)
 
     const isFavorite = optimisticFav ?? favoriteIds.has(snippet.id)
     const isPublic = optimisticPub ?? publicIds.has(snippet.id)
@@ -112,6 +112,16 @@ export default function SnippetDetail({
             setAssignedIds(assignedCols.map((c: { id: number }) => c.id))
         })
     }, [colOpen, snippet.id])
+
+    // Desktop default info panel kebuka, mobile default collapsed — satu state
+    // `infoOpen` yang dipakai semua breakpoint, cuma default-nya beda per layar.
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        if (window.matchMedia("(min-width: 1024px)").matches) {
+            const rafId = requestAnimationFrame(() => setInfoOpen(true))
+            return () => cancelAnimationFrame(rafId)
+        }
+    }, [])
 
     const handleToggleCollection = async (colId: number) => {
         const isAssigned = assignedIds.includes(colId)
@@ -265,7 +275,7 @@ export default function SnippetDetail({
 
                     <div className="flex items-center gap-2 shrink-0">
                         {showPersonalControls && (
-                        <div className={`${mobileInfoOpen ? "flex" : "hidden"} lg:flex items-center gap-2`}>
+                        <div className={`${infoOpen ? "flex" : "hidden"} items-center gap-2`}>
                             <button
                                 onClick={handleFavorite}
                                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[12px] font-medium transition-all
@@ -316,19 +326,19 @@ export default function SnippetDetail({
                         )}
 
                         <button
-                            onClick={() => setMobileInfoOpen(v => !v)}
-                            className="lg:hidden flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[var(--border2)] text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
-                            aria-label={mobileInfoOpen ? "Tutup detail note" : "Buka detail note"}
+                            onClick={() => setInfoOpen(v => !v)}
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-[var(--border2)] text-[var(--text3)] transition-all hover:bg-[var(--surface2)] hover:text-[var(--em)]"
+                            aria-label={infoOpen ? "Tutup detail note" : "Buka detail note"}
                         >
                             <FontAwesomeIcon
                                 icon={faChevronDown}
-                                className={`h-3 w-3 transition-transform ${mobileInfoOpen ? "rotate-180" : ""}`}
+                                className={`h-3 w-3 transition-transform ${infoOpen ? "rotate-180" : ""}`}
                             />
                         </button>
                     </div>
                 </div>
 
-                <div className={`${mobileInfoOpen ? "block" : "hidden"} lg:block`}>
+                <div className={`${infoOpen ? "block" : "hidden"}`}>
                 {snippet.description && (
                     <p className="text-[12px] text-[var(--text3)] mb-2 sm:mb-3 leading-relaxed max-w-3xl">
                         {snippet.description}
@@ -462,7 +472,7 @@ export default function SnippetDetail({
                     )}
                 </div>
 
-                <div className={`${mobileInfoOpen ? "flex" : "hidden"} lg:flex items-center gap-4 mt-3 font-mono text-[8px] sm:text-[10px] text-[var(--text4)]`}>
+                <div className={`${infoOpen ? "flex" : "hidden"} items-center gap-4 mt-3 font-mono text-[8px] sm:text-[10px] text-[var(--text4)]`}>
                     <span>Disimpan {snippet.createdAt}</span>
                     <span>{copyCount} kali disalin</span>
                     {showPersonalControls && (

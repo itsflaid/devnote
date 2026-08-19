@@ -28,12 +28,32 @@ export const metadata: Metadata = {
     "Devnote adalah code note manager untuk developer. Simpan, organisir, dan temukan kembali kode favoritmu dengan cepat.",
 
   keywords: [
+    "code snippet manager",
+    "snippet manager online",
     "code note manager",
-    "code note organizer",
+    "aplikasi catatan developer online",
+    "developer note app",
+    "simpan kode online",
+    "code snippet manager gratis",
+    "share code online",
+    "share kode",
+    "explore code",
+    "code snippet manager tim",
+    "alternatif github gist",
+    "tempat simpan kode sering dipakai",
+    "cara organize code snippet rapi",
+    "code snippet manager indonesia",
+    "code snippet organizer",
+    "simpan kode di cloud",
+    "snippet sharing",
+    "kumpulan code snippet",
+    "code library online",
+    "pastebin alternatif",
+    "manajemen snippet",
+    "repo kode pribadi",
+    "simpan snippet kode",
     "devnote",
     "developer tools",
-    "simpan kode",
-    "next.js code note app",
   ],
 
   authors: [{ name: "Fadil" }],
@@ -91,6 +111,28 @@ export default function RootLayout({
       className={`${outfit.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen bg-[#0a0a0a] text-[#e8f0e8] antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Devnote",
+              url: "https://devnote-five.vercel.app",
+              description:
+                "Devnote adalah code snippet manager untuk developer. Simpan, organisir, dan bagikan kode online.",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate:
+                    "https://devnote-five.vercel.app/explore?search={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
