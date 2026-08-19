@@ -9,5 +9,6 @@ export interface Snippet {
     isFavorite?: boolean
     isPublic?: boolean
     createdAt: string
+    updatedAt?: string
     shareId?: string | null
 }

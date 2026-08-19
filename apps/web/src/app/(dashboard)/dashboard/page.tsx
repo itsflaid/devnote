@@ -128,6 +128,7 @@ async function DashboardContent({
       month: "long",
       year: "numeric",
     }),
+    updatedAt: s.updatedAt.toISOString(),
     tags: s.tags.map((t) => t.tag.name),
     workspaces: s.workspaces.map((item) => ({
       id: item.workspace.id,

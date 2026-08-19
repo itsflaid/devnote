@@ -22,6 +22,7 @@ interface SnippetModalProps {
     onClose: () => void;
     workspaceId?: number;
     snippetToEdit?: Snippet | null;
+    onUpdated?: (snippet: Snippet) => void;
 }
 
 interface ImportNotice {
@@ -47,6 +48,7 @@ export default function SnippetModal({
     onClose,
     snippetToEdit,
     workspaceId,
+    onUpdated,
 }: SnippetModalProps) {
     const router = useRouter();
     const defaultLanguage = useAppStore(s => s.prefs.defaultLanguage)
@@ -182,6 +184,15 @@ export default function SnippetModal({
         try {
             if (isEditMode && snippetToEdit) {
                 await updateSnippet.mutateAsync({ ...input, id: snippetToEdit.id })
+                onUpdated?.({
+                    ...snippetToEdit,
+                    title: input.title,
+                    language: input.language,
+                    description: input.description,
+                    code: input.code,
+                    tags,
+                    updatedAt: new Date().toISOString(),
+                })
             } else {
                 await createSnippet.mutateAsync(input)
             }
