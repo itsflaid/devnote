@@ -10,6 +10,25 @@ import ExploreTopbar from "@/components/explore/ExploreTopbar"
 import ExploreHero from "@/components/explore/ExploreHero"
 
 import { languages } from "@/lib/languages"
+
+interface InitialData {
+    snippets: {
+        id: number
+        title: string
+        description: string | null
+        code: string
+        language: string
+        copyCount: number
+        createdAt: Date
+        tags: string[]
+        user: { id: number; name: string; avatar: string | null }
+        likeCount: number
+        likedByMe: boolean
+    }[]
+    total: number
+    page: number
+    totalPages: number
+}
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faSliders, faTimes } from "@fortawesome/free-solid-svg-icons"
 
@@ -30,7 +49,7 @@ const LANG_FILTERS = [
         }))
 ]
 
-export default function ExploreClient() {
+export default function ExploreClient({ initialData }: { initialData?: InitialData }) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [, startTransition] = useTransition()
@@ -42,7 +61,10 @@ export default function ExploreClient() {
     const [search, setSearch] = useState(searchParams.get("search") ?? "")
     const [page, setPage] = useState(Number(searchParams.get("page") ?? "1"))
 
-    const { data: exploreData, isLoading: loading } = trpc.snippet.explore.useQuery({ sort: sort as "newest" | "oldest" | "popular" | "most-copied", lang: lang || undefined, search: search || undefined, page })
+    const { data: exploreData, isLoading: loading } = trpc.snippet.explore.useQuery(
+        { sort: sort as "newest" | "oldest" | "popular" | "most-copied", lang: lang || undefined, search: search || undefined, page },
+        initialData ? { initialData } : {}
+    )
 
     const snippets: PublicSnippet[] = exploreData?.snippets ?? []
     const total = exploreData?.total ?? 0
