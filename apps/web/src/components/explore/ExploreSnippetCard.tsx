@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { getLang } from "@/lib/languages"
-import { trpc } from "@/lib/trpc"
 import { timeAgo, getInitials } from "@/lib/format"
 import Image from "next/image"
 import ExploreSnippetDetailModal from "@/components/explore/ExploreSnippetDetailModal"
@@ -36,8 +36,14 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
     const [detailOpen, setDetailOpen] = useState(false)
     const [liking, setLiking] = useState(false)
     const [copied, setCopied] = useState(false)
-    const toggleLike = trpc.snippet.toggleLike.useMutation()
-    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
+    const toggleLike = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/like`, { method: "POST" }).then(r => r.json() as Promise<{ liked: boolean; count: number }>),
+    })
+    const incrementCopy = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/copy`, { method: "POST" }).then(r => r.json()),
+    })
 
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation()
@@ -48,7 +54,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
         if (liking) return
         setLiking(true)
         try {
-            const data = await toggleLike.mutateAsync({ id: snippet.id })
+            const data = await toggleLike.mutateAsync(snippet.id)
             onLikeToggle(snippet.id, data.liked, data.count)
         } finally {
             setLiking(false)
@@ -60,7 +66,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
         await navigator.clipboard.writeText(snippet.code)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
-        incrementCopy.mutate({ id: snippet.id })
+        incrementCopy.mutate(snippet.id)
     }
 
     const previewCode = snippet.code.split("\n").slice(0, 7).join("\n")

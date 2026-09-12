@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 interface RemoveWorkspaceSnippetButtonProps {
   workspaceId: number
@@ -17,7 +17,10 @@ export default function RemoveWorkspaceSnippetButton({
 }: RemoveWorkspaceSnippetButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const removeMutation = trpc.workspace.snippets.remove.useMutation()
+  const removeMutation = useMutation({
+    mutationFn: (input: { workspaceId: number; snippetId: number }) =>
+      fetch(`/api/workspaces/${input.workspaceId}/snippets/${input.snippetId}`, { method: "DELETE" }).then(r => r.json()),
+  })
 
   const removeSnippet = async () => {
     const ok = window.confirm(

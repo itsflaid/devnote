@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { trpc } from "@/lib/trpc"
+import { useQuery } from "@tanstack/react-query"
 import ExploreSnippetCard, { PublicSnippet } from "@/components/explore/ExploreSnippetCard"
 import ExplorePagination from "@/components/explore/ExplorePagination"
 import ExploreTopbar from "@/components/explore/ExploreTopbar"
@@ -54,17 +54,25 @@ export default function ExploreClient({ initialData }: { initialData?: InitialDa
     const searchParams = useSearchParams()
     const [, startTransition] = useTransition()
 
-    
+
 
     const [sort, setSort] = useState(searchParams.get("sort") ?? "newest")
     const [lang, setLang] = useState(searchParams.get("lang") ?? "")
     const [search, setSearch] = useState(searchParams.get("search") ?? "")
     const [page, setPage] = useState(Number(searchParams.get("page") ?? "1"))
 
-    const { data: exploreData, isLoading: loading } = trpc.snippet.explore.useQuery(
-        { sort: sort as "newest" | "oldest" | "popular" | "most-copied", lang: lang || undefined, search: search || undefined, page },
-        initialData ? { initialData } : {}
-    )
+    const { data: exploreData, isLoading: loading } = useQuery({
+        queryKey: ["explore", sort, lang, search, page],
+        queryFn: () => {
+            const params = new URLSearchParams()
+            params.set("sort", sort)
+            if (lang) params.set("lang", lang)
+            if (search) params.set("search", search)
+            params.set("page", String(page))
+            return fetch(`/api/explore?${params}`).then(r => r.json())
+        },
+        initialData,
+    })
 
     const snippets: PublicSnippet[] = exploreData?.snippets ?? []
     const total = exploreData?.total ?? 0

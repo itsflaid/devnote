@@ -3,11 +3,18 @@
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
 import { formatWorkspaceInviteCode } from "@/lib/workspaceInviteCode"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 export default function JoinWorkspaceModal() {
   const router = useRouter()
-  const joinWorkspace = trpc.workspace.join.useMutation()
+  const joinWorkspace = useMutation({
+    mutationFn: (input: { inviteCode: string }) =>
+      fetch("/api/workspaces/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+  })
 
   const [inviteCode, setInviteCode] = useState("")
   const [loading, setLoading] = useState(false)

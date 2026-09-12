@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 import { useAppStore } from "@/lib/store"
 
 const FONT_SIZE_PRE_CLASS: Record<string, string> = {
@@ -23,7 +23,17 @@ export default function CodeBlock({ code, language }: {
     language: string
 }) {
     const [html, setHtml] = useState('')
-    const highlight = trpc.highlight.run.useMutation()
+    const highlight = useMutation({
+        mutationFn: (input: { code: string; language: string; theme: string }) =>
+            fetch("/api/highlight", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }).then(async (res) => {
+                if (!res.ok) throw new Error("Highlight failed")
+                return res.json() as Promise<{ html: string }>
+            }),
+    })
     const codeTheme = useAppStore(s => s.prefs.codeTheme)
     const codeFontSize = useAppStore(s => s.prefs.codeFontSize)
     const lineNumbers = useAppStore(s => s.prefs.lineNumbers)

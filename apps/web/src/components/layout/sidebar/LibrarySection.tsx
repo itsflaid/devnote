@@ -2,6 +2,7 @@
 
 import { useEffect, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   faBookmark,
   faGlobe,
@@ -12,9 +13,12 @@ import {
 
 import { useAppStore } from "@/lib/store"
 import { useSidebarStore } from "@/lib/sidebarStore"
-import { trpc } from "@/lib/trpc"
 import SidebarSection from "./SidebarSection"
 import NavItem from "./NavItem"
+
+interface Snippet {
+  id: number
+}
 
 interface LibrarySectionProps {
   totalSnippets: number
@@ -35,6 +39,7 @@ export default function LibrarySection({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+  const queryClient = useQueryClient()
 
   const {
     favCount,
@@ -67,18 +72,24 @@ export default function LibrarySection({
     setPublicCount(totalPublic)
   }, [totalPublic, setPublicCount])
 
-  const { data: favSnippets } = trpc.snippet.list.useQuery({ filter: "favorites" })
-  const { data: pubSnippets } = trpc.snippet.list.useQuery({ filter: "public" })
+  const { data: favSnippets } = useQuery<Snippet[]>({
+    queryKey: ["snippets", "favorites"],
+    queryFn: () => fetch("/api/snippets?filter=favorites").then(r => r.json()),
+  })
+  const { data: pubSnippets } = useQuery<Snippet[]>({
+    queryKey: ["snippets", "public"],
+    queryFn: () => fetch("/api/snippets?filter=public").then(r => r.json()),
+  })
 
   useEffect(() => {
     if (favSnippets) {
-      setFavoriteIds(favSnippets.map((s: { id: number }) => s.id))
+      setFavoriteIds(favSnippets.map((s) => s.id))
     }
   }, [favSnippets, setFavoriteIds])
 
   useEffect(() => {
     if (pubSnippets) {
-      setPublicIds(pubSnippets.map((s: { id: number }) => s.id))
+      setPublicIds(pubSnippets.map((s) => s.id))
     }
   }, [pubSnippets, setPublicIds])
 

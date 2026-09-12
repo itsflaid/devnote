@@ -55,3 +55,4 @@ src/generated/prisma/
 logs/
 *.log
 
+docs/

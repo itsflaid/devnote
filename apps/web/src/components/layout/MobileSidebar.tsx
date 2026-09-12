@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSidebar } from "./DashboardLayout"
 import SidebarClient from "./sidebar/SidebarClient"
-import { trpc } from "@/lib/trpc"
+import { useQuery } from "@tanstack/react-query"
 import type { SidebarData } from "@/server/services/sidebarData"
 
 interface MobileSidebarProps {
@@ -13,7 +13,9 @@ interface MobileSidebarProps {
 
 export default function MobileSidebar({ initialSidebarData }: MobileSidebarProps) {
     const { sidebarOpen, setSidebarOpen } = useSidebar()
-    const { data: sidebarData } = trpc.sidebar.get.useQuery(undefined, {
+    const { data: sidebarData } = useQuery<SidebarData>({
+        queryKey: ["sidebar"],
+        queryFn: () => fetch("/api/sidebar").then(r => r.json()),
         enabled: sidebarOpen,
         initialData: initialSidebarData,
         staleTime: 30_000,
