@@ -1,26 +1,29 @@
 'use client'
 
 import { useState } from "react"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
-export default function CopyButton({ 
-    code, 
+export default function CopyButton({
+    code,
     snippetId,
     onCopy
-}: { 
+}: {
     code: string
     snippetId: number
     onCopy?: () => void
 }) {
     const [copied, setCopied] = useState(false)
-    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
+    const incrementCopy = useMutation({
+        mutationFn: () =>
+            fetch(`/api/snippets/${snippetId}/copy`, { method: "POST" }).then(r => r.json()),
+    })
 
     const handleCopy = async () => {
         navigator.clipboard.writeText(code)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
         onCopy?.()
-        incrementCopy.mutate({ id: snippetId })
+        incrementCopy.mutate()
     }
 
     return (

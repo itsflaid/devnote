@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 interface AvailableSnippet {
   id: number
@@ -25,7 +25,14 @@ export default function AddExistingSnippetModal({
   const [search, setSearch] = useState("")
   const [loadingId, setLoadingId] = useState<number | null>(null)
   const [error, setError] = useState("")
-  const addSnippetMutation = trpc.workspace.snippets.add.useMutation()
+  const addSnippetMutation = useMutation({
+    mutationFn: (input: { workspaceId: number; snippetId: number }) =>
+      fetch(`/api/workspaces/${input.workspaceId}/snippets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ snippetId: input.snippetId }),
+      }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+  })
 
   const close = () => {
     router.push(`/workspaces/${workspaceId}`)

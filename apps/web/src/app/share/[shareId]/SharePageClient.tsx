@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faUser, faCopy, faCheck, faArrowRight, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 import { useSession } from "next-auth/react"
@@ -31,7 +31,10 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
     const [infoOpen, setInfoOpen] = useState(true)
     const lang = getLang(snippet.language)
-    const incrementCopy = trpc.snippet.incrementCopy.useMutation()
+    const incrementCopy = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/copy`, { method: "POST" }).then(r => r.json()),
+    })
 
     const { data: session } = useSession()
 
@@ -41,7 +44,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
             await navigator.clipboard.writeText(snippet.code)
             setCopied(true)
             setCopyCount(c => c + 1)
-            incrementCopy.mutate({ id: snippet.id })
+            incrementCopy.mutate(snippet.id)
             setTimeout(() => setCopied(false), 1800)
         } catch {
             const ta = document.createElement("textarea")
@@ -66,7 +69,7 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
 
             {/* Background Glow */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div 
+                <div
                     className="absolute inset-0 opacity-20"
                     style={{
                         backgroundImage: `
@@ -80,10 +83,10 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
             </div>
 
             <div className="relative w-full h-screen lg:max-w-6xl lg:mx-auto lg:h-[680px]">
-                
+
                 <div className="bg-[#111a16] border-0 sm:border border-emerald-500/20 rounded-none sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row h-full">
 
-                    <div className="w-full lg:w-[310px] bg-[#0c1210] border-b lg:border-b-0 lg:border-r border-emerald-500/10 
+                    <div className="w-full lg:w-[310px] bg-[#0c1210] border-b lg:border-b-0 lg:border-r border-emerald-500/10
                                     p-4 lg:p-7 flex flex-col">
 
                         <div className="flex items-center justify-between mb-2 lg:mb-6">
@@ -102,13 +105,13 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
 
                             <Link
                                 href={session ? "/dashboard" : "/"}
-                                className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                className="lg:hidden group flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 transition-all
                                         text-black font-medium px-4 py-1.5 rounded-2xl text-xs whitespace-nowrap"
                             >
                                 {session? "Dashboard" : "Gabung"}
-                                <FontAwesomeIcon 
-                                    icon={faArrowRight} 
-                                    className="group-hover:translate-x-0.5 transition-transform text-[10px]" 
+                                <FontAwesomeIcon
+                                    icon={faArrowRight}
+                                    className="group-hover:translate-x-0.5 transition-transform text-[10px]"
                                 />
                             </Link>
                         </div>
@@ -194,18 +197,18 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                             <div className="hidden lg:block mt-auto pt-8">
                                 <Link
                                     href={session ? "/dashboard" : "/"}
-                                    className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all 
+                                    className="group flex items-center justify-between bg-emerald-500 hover:bg-emerald-400 transition-all
                                             text-black font-semibold px-5 py-3 rounded-2xl text-sm w-full"
                                 >
                                     <span>{session ? "Masuk ke Dashboard" : "Gabung ke Devnote"}</span>
-                                    <FontAwesomeIcon 
-                                        icon={faArrowRight} 
-                                        className="group-hover:translate-x-1 transition-transform" 
+                                    <FontAwesomeIcon
+                                        icon={faArrowRight}
+                                        className="group-hover:translate-x-1 transition-transform"
                                     />
                                 </Link>
                             </div>
 
-                            <a href="https://github.com/Mufacoderz" target="_blank" 
+                            <a href="https://github.com/Mufacoderz" target="_blank"
                             className="text-emerald-100/40 text-[10px] text-center mt-6 lg:mt-8 block">
                                 Shared via <span className="text-emerald-400">devnote</span> — by Muhammad Fadil
                             </a>
@@ -231,8 +234,8 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                             <button
                                 onClick={handleCopy}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all border
-                                    ${copied 
-                                        ? "bg-emerald-500 text-black border-emerald-400" 
+                                    ${copied
+                                        ? "bg-emerald-500 text-black border-emerald-400"
                                         : "border-emerald-500/40 hover:border-emerald-400 hover:text-white text-emerald-100"
                                     }`}
                             >

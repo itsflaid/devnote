@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   faEllipsis,
   faFolder,
@@ -13,8 +14,13 @@ import {
 
 import { useAppStore } from "@/lib/store"
 import { useSidebarStore } from "@/lib/sidebarStore"
-import { trpc } from "@/lib/trpc"
 import SidebarSection from "./SidebarSection"
+
+interface Collection {
+  id: number
+  name: string
+  _count: { snippets: number }
+}
 
 interface CollectionSectionProps {
   onNavigate?: () => void
@@ -24,17 +30,57 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
+  const queryClient = useQueryClient()
 
   const { setIsNavigating } = useAppStore()
   const { collapsed, toggle } = useSidebarStore()
 
   const activeCollection = searchParams.get("collection")
 
-  const createCollection = trpc.collection.create.useMutation()
-  const renameCollection = trpc.collection.rename.useMutation()
-  const deleteCollection = trpc.collection.delete.useMutation()
-  const utils = trpc.useUtils()
-  const { data: collectionsData } = trpc.collection.list.useQuery()
+  const { data: collectionsData } = useQuery<Collection[]>({
+    queryKey: ["collections"],
+    queryFn: () => fetch("/api/collections").then(r => r.json()),
+  })
+
+  const createCollection = useMutation({
+    mutationFn: (name: string) =>
+      fetch("/api/collections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      }).then(r => r.json()),
+    onSuccess: (data: Collection) => {
+      queryClient.setQueryData<Collection[]>(["collections"], (prev) => [
+        { ...data, _count: { snippets: 0 } },
+        ...(prev ?? []),
+      ])
+    },
+  })
+
+  const renameCollection = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      fetch(`/api/collections/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      }).then(r => r.json()),
+    onSuccess: (_data: Collection, variables) => {
+      queryClient.setQueryData<Collection[]>(["collections"], (prev) =>
+        prev?.map((c) => (c.id === variables.id ? { ...c, name: variables.name } : c)) ?? prev
+      )
+    },
+  })
+
+  const deleteCollection = useMutation({
+    mutationFn: (id: number) =>
+      fetch(`/api/collections/${id}`, { method: "DELETE" }).then(r => r.json()),
+    onSuccess: (_data, id) => {
+      queryClient.setQueryData<Collection[]>(["collections"], (prev) =>
+        prev?.filter((c) => c.id !== id) ?? prev
+      )
+      if (activeCollection === String(id)) router.replace("/dashboard")
+    },
+  })
 
   const collections = useMemo(() => collectionsData ?? [], [collectionsData])
 
@@ -63,38 +109,21 @@ export default function CollectionSection({ onNavigate }: CollectionSectionProps
 
   const handleAddCollection = async () => {
     if (!newColName.trim()) return
-
-    const data = await createCollection.mutateAsync({ name: newColName.trim() })
-
-    utils.collection.list.setData(undefined, (prev) => [
-      { ...data, _count: { snippets: 0 } },
-      ...(prev ?? []),
-    ])
+    await createCollection.mutateAsync(newColName.trim())
     setNewColName("")
     setAddingCol(false)
   }
 
   const handleRename = async (id: number) => {
     if (!editingName.trim()) return
-
     await renameCollection.mutateAsync({ id, name: editingName.trim() })
-
-    utils.collection.list.setData(undefined, (prev) =>
-      prev?.map((c) => (c.id === id ? { ...c, name: editingName.trim() } : c)) ?? prev
-    )
     setEditingId(null)
     setEditingName("")
   }
 
   const handleDelete = async (id: number) => {
-    await deleteCollection.mutateAsync({ id })
-
-    utils.collection.list.setData(undefined, (prev) =>
-      prev?.filter((c) => c.id !== id) ?? prev
-    )
+    await deleteCollection.mutateAsync(id)
     setMenuOpenId(null)
-
-    if (activeCollection === String(id)) router.replace("/dashboard")
   }
 
   return (

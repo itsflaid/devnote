@@ -6,7 +6,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { LANGUAGE_OPTIONS } from "@/lib/languages"
 import { type Snippet } from "@/components/snippet/shared/types"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 import { useAppStore } from "@/lib/store"
 import {
     detectLanguage,
@@ -54,8 +54,22 @@ export default function SnippetModal({
     const defaultLanguage = useAppStore(s => s.prefs.defaultLanguage)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const createSnippet = trpc.snippet.create.useMutation();
-    const updateSnippet = trpc.snippet.update.useMutation();
+    const createSnippet = useMutation({
+        mutationFn: (input: { title: string; language: string; description: string; code: string; tags: string[]; workspaceId?: number | null }) =>
+            fetch("/api/snippets", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+    });
+    const updateSnippet = useMutation({
+        mutationFn: (input: { id: number; title: string; language: string; description: string; code: string; tags: string[]; workspaceId?: number | null }) =>
+            fetch(`/api/snippets/${input.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+    });
 
     const isEditMode = !!snippetToEdit;
 

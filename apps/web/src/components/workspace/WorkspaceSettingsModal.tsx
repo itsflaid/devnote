@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { trpc } from "@/lib/trpc"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faCopy,
@@ -58,24 +58,57 @@ export default function WorkspaceSettingsModal({
   onClose,
 }: WorkspaceSettingsModalProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const isOwner = role === "OWNER"
-  const updateWorkspace = trpc.workspace.update.useMutation()
-  const regenerateInviteMutation = trpc.workspace.regenerateInvite.useMutation()
-  const deleteWorkspace = trpc.workspace.delete.useMutation()
-  const updateMemberRole = trpc.workspace.members.updateRole.useMutation()
-  const transferOwnership = trpc.workspace.members.transferOwnership.useMutation()
-  const removeMember = trpc.workspace.members.remove.useMutation()
+
+  const updateWorkspace = useMutation({
+    mutationFn: (input: { id: number; name: string; description: string }) =>
+      fetch(`/api/workspaces/${input.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: input.name, description: input.description }),
+      }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+  })
+  const regenerateInviteMutation = useMutation({
+    mutationFn: (input: { id: number }) =>
+      fetch(`/api/workspaces/${input.id}/invite/regenerate`, { method: "POST" }).then(r => r.json()),
+  })
+  const deleteWorkspace = useMutation({
+    mutationFn: (input: { id: number }) =>
+      fetch(`/api/workspaces/${input.id}`, { method: "DELETE" }).then(r => r.json()),
+  })
+  const updateMemberRole = useMutation({
+    mutationFn: (input: { workspaceId: number; memberId: number; role: "EDITOR" | "VIEWER" }) =>
+      fetch(`/api/workspaces/${input.workspaceId}/members/${input.memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: input.role }),
+      }).then(r => r.json()),
+  })
+  const transferOwnership = useMutation({
+    mutationFn: (input: { workspaceId: number; memberId: number }) =>
+      fetch(`/api/workspaces/${input.workspaceId}/members/${input.memberId}/transfer-ownership`, { method: "POST" }).then(r => r.json()),
+  })
+  const removeMember = useMutation({
+    mutationFn: (input: { workspaceId: number; memberId?: number }) =>
+      fetch(`/api/workspaces/${input.workspaceId}/members`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: input.memberId }),
+      }).then(r => r.json()),
+  })
+
   const [name, setName] = useState(workspaceName)
   const [workspaceDescription, setWorkspaceDescription] = useState(
     description ?? ""
   )
   const [currentInviteCode, setCurrentInviteCode] = useState(inviteCode)
 
-  const { data: membersData, isLoading: loadingMembers } = trpc.workspace.members.list.useQuery(
-    { workspaceId },
-    { enabled: isOwner }
-  )
-  const utils = trpc.useUtils()
+  const { data: membersData, isLoading: loadingMembers } = useQuery<WorkspaceMember[]>({
+    queryKey: ["workspace", workspaceId, "members"],
+    queryFn: () => fetch(`/api/workspaces/${workspaceId}/members`).then(r => r.json()),
+    enabled: isOwner,
+  })
   const members = membersData ?? []
 
   const [savingDetails, setSavingDetails] = useState(false)
@@ -183,7 +216,7 @@ export default function WorkspaceSettingsModal({
     const previousMembers = members
     resetFeedback()
     setUpdatingId(memberId)
-    utils.workspace.members.list.setData({ workspaceId }, (current) =>
+    queryClient.setQueryData<WorkspaceMember[]>(["workspace", workspaceId, "members"], (current) =>
       current?.map((member) =>
         member.id === memberId ? { ...member, role: nextRole } : member
       ) ?? current
@@ -193,7 +226,7 @@ export default function WorkspaceSettingsModal({
       await updateMemberRole.mutateAsync({ workspaceId, memberId, role: nextRole })
       setNotice("Role anggota diperbarui.")
     } catch (updateError) {
-      utils.workspace.members.list.setData({ workspaceId }, previousMembers)
+      queryClient.setQueryData<WorkspaceMember[]>(["workspace", workspaceId, "members"], previousMembers)
       setError(
         updateError instanceof Error
           ? updateError.message
@@ -218,7 +251,7 @@ export default function WorkspaceSettingsModal({
           workspaceId,
           memberId: pendingAction.member.id,
         })
-        utils.workspace.members.list.setData({ workspaceId }, (current) =>
+        queryClient.setQueryData<WorkspaceMember[]>(["workspace", workspaceId, "members"], (current) =>
           current?.filter((member) => member.id !== pendingAction.member.id) ?? current
         )
         setNotice(`${pendingAction.member.user.name} dikeluarkan dari workspace.`)

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import {signIn} from "next-auth/react"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 export default function RegisterPageClient() {
     const router = useRouter()
@@ -20,7 +20,18 @@ export default function RegisterPageClient() {
         const timer = setTimeout(() => setShowGithubToast(false), 3000)
         return () => clearTimeout(timer)
     }, [showGithubToast])
-    const registerMutation = trpc.auth.register.useMutation()
+    const registerMutation = useMutation({
+        mutationFn: (input: { name: string; email: string; password: string }) =>
+            fetch("/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            }).then(async (res) => {
+                const data = await res.json()
+                if (!res.ok) throw new Error(data.error)
+                return data
+            }),
+    })
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()

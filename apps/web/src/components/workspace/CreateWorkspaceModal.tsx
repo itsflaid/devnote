@@ -2,11 +2,18 @@
 
 import { FormEvent, useState } from "react"
 import { useRouter } from "next/navigation"
-import { trpc } from "@/lib/trpc"
+import { useMutation } from "@tanstack/react-query"
 
 export default function CreateWorkspaceModal() {
   const router = useRouter()
-  const createWorkspace = trpc.workspace.create.useMutation()
+  const createWorkspace = useMutation({
+    mutationFn: (input: { name: string; description: string }) =>
+      fetch("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      }).then(async (res) => { if (!res.ok) throw new Error((await res.json()).error); return res.json() }),
+  })
 
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")

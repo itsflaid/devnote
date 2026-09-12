@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { trpc } from "@/lib/trpc"
+import { useQuery } from "@tanstack/react-query"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faArrowLeft, faCheck, faTriangleExclamation, faPen } from "@fortawesome/free-solid-svg-icons"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { getLang } from "@/lib/languages"
 
 interface Stats {
@@ -81,7 +81,10 @@ export default function ProfilePage() {
     const router = useRouter()
     const [saved, setSaved] = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
-    const { data: stats } = trpc.userStats.get.useQuery()
+    const { data: stats } = useQuery<Stats>({
+        queryKey: ["userStats"],
+        queryFn: () => fetch("/api/user-stats").then(r => r.json()),
+    })
 
     const user = session?.user
 

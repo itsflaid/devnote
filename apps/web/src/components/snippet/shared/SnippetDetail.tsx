@@ -1,13 +1,13 @@
 "use client"
 import { useState, useEffect, useRef, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import CopyButton from "./CopyButton"
 import CodeBlock from "./CodeBlock"
 import MarkdownViewer from "./MarkdownViewer"
 import type { Snippet } from "./types"
 import { getLang } from "@/lib/languages"
 import { useAppStore } from "@/lib/store"
-import { trpc } from "@/lib/trpc"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFolderPlus, faCheck, faCopy, faLink, faLinkSlash, faEllipsisVertical, faCode, faEye, faChevronDown } from "@fortawesome/free-solid-svg-icons"
 
@@ -38,6 +38,7 @@ export default function SnippetDetail({
     onDeleted,
 }: SnippetDetailProps) {
     const router = useRouter()
+    const queryClient = useQueryClient()
     const {
         incrementFav,
         decrementFav,
@@ -49,13 +50,34 @@ export default function SnippetDetail({
         publicIds,
     } = useAppStore()
 
-    const utils = trpc.useUtils()
-    const deleteMutation = trpc.snippet.delete.useMutation()
-    const toggleFavoriteMutation = trpc.snippet.toggleFavorite.useMutation()
-    const togglePublishMutation = trpc.snippet.togglePublish.useMutation()
-    const toggleShareMutation = trpc.snippet.toggleShare.useMutation()
-    const addSnippetMutation = trpc.collection.addSnippet.useMutation()
-    const removeSnippetMutation = trpc.collection.removeSnippet.useMutation()
+    const deleteMutation = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}`, { method: "DELETE" }).then(r => r.json()),
+    })
+    const toggleFavoriteMutation = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/favorite`, { method: "POST" }).then(r => r.json() as Promise<{ isFavorite: boolean }>),
+    })
+    const togglePublishMutation = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/publish`, { method: "POST" }).then(r => r.json() as Promise<{ isPublic: boolean }>),
+    })
+    const toggleShareMutation = useMutation({
+        mutationFn: (id: number) =>
+            fetch(`/api/snippets/${id}/share`, { method: "POST" }).then(r => r.json() as Promise<{ shareId: string | null }>),
+    })
+    const addSnippetMutation = useMutation({
+        mutationFn: (input: { id: number; snippetId: number }) =>
+            fetch(`/api/collections/${input.id}/snippets`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ snippetId: input.snippetId }),
+            }).then(r => r.json()),
+    })
+    const removeSnippetMutation = useMutation({
+        mutationFn: (input: { id: number; snippetId: number }) =>
+            fetch(`/api/collections/${input.id}/snippets/${input.snippetId}`, { method: "DELETE" }).then(r => r.json()),
+    })
 
     const [deleting, setDeleting] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
@@ -105,16 +127,14 @@ export default function SnippetDetail({
     useEffect(() => {
         if (!colOpen) return
         Promise.all([
-            utils.collection.list.fetch(),
-            utils.snippet.getCollections.fetch({ id: snippet.id })
+            fetch("/api/collections").then(r => r.json()),
+            fetch(`/api/snippets/${snippet.id}/collections`).then(r => r.json()),
         ]).then(([allCols, assignedCols]) => {
             setCollections(allCols ?? [])
             setAssignedIds(assignedCols.map((c: { id: number }) => c.id))
         })
     }, [colOpen, snippet.id])
 
-    // Desktop default info panel kebuka, mobile default collapsed — satu state
-    // `infoOpen` yang dipakai semua breakpoint, cuma default-nya beda per layar.
     useEffect(() => {
         if (typeof window === "undefined") return
         if (window.matchMedia("(min-width: 1024px)").matches) {
@@ -154,7 +174,7 @@ export default function SnippetDetail({
     const handleDelete = async () => {
         setDeleting(true)
         try {
-            await deleteMutation.mutateAsync({ id: snippet.id })
+            await deleteMutation.mutateAsync(snippet.id)
             setConfirmOpen(false)
             setDeleting(false)
             onDeleted?.()
@@ -172,7 +192,7 @@ export default function SnippetDetail({
         else decrementFav()
         toggleFavoriteId(snippet.id)
         try {
-            const data = await toggleFavoriteMutation.mutateAsync({ id: snippet.id })
+            const data = await toggleFavoriteMutation.mutateAsync(snippet.id)
             setOptimisticFav(data.isFavorite)
         } catch {
             setOptimisticFav(null)
@@ -189,7 +209,7 @@ export default function SnippetDetail({
         else decrementPublicCount()
         togglePublicId(snippet.id)
         try {
-            const data = await togglePublishMutation.mutateAsync({ id: snippet.id })
+            const data = await togglePublishMutation.mutateAsync(snippet.id)
             setOptimisticPub(data.isPublic)
         } catch {
             setOptimisticPub(null)
@@ -207,7 +227,7 @@ export default function SnippetDetail({
 
         setShareLoading(true)
         try {
-            const data = await toggleShareMutation.mutateAsync({ id: snippet.id })
+            const data = await toggleShareMutation.mutateAsync(snippet.id)
             setShareId(data.shareId)
             setTimeout(() => setShareOpen(true), 0)
         } catch {
@@ -234,7 +254,7 @@ export default function SnippetDetail({
 
     const handleUnshare = async () => {
         try {
-            const data = await toggleShareMutation.mutateAsync({ id: snippet.id })
+            const data = await toggleShareMutation.mutateAsync(snippet.id)
             setShareId(data.shareId)
             setShareOpen(false)
         } catch {
