@@ -89,6 +89,23 @@ export default function SnippetModal({
         return () => document.removeEventListener("keydown", handleKeyDown)
     }, [onClose])
 
+    const resetForm = () => {
+        setForm(getInitialForm(null, defaultLanguage))
+        setImportedFile(null)
+        setImportNotice(null)
+        setImporting(false)
+        setError("")
+    }
+
+    useEffect(() => {
+        if (!isOpen) return
+        setForm(getInitialForm(snippetToEdit, defaultLanguage))
+        setImportedFile(null)
+        setImportNotice(null)
+        setImporting(false)
+        setError("")
+    }, [isOpen, snippetToEdit, defaultLanguage])
+
     if (!isOpen) return null;
 
     const handleChange = (
@@ -209,6 +226,7 @@ export default function SnippetModal({
                 })
             } else {
                 await createSnippet.mutateAsync(input)
+                resetForm()
             }
             router.refresh();
             onClose();
