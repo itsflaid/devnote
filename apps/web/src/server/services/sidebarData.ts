@@ -5,6 +5,7 @@ export interface SidebarData {
   totalCopies: number
   totalFavorites: number
   totalPublic: number
+  totalSaved: number
   workspaceSnippetsCount: number
   workspaces: {
     id: number
@@ -16,12 +17,13 @@ export interface SidebarData {
 }
 
 export async function getSidebarData(userId: number): Promise<SidebarData> {
-  const [totalSnippets, totalCopiesResult, totalFavorites, totalPublic, tags, workspaceSnippetsCount, memberships] =
+  const [totalSnippets, totalCopiesResult, totalFavorites, totalPublic, totalSaved, tags, workspaceSnippetsCount, memberships] =
     await Promise.all([
       prisma.snippet.count({ where: { userId } }),
       prisma.snippet.aggregate({ where: { userId }, _sum: { copyCount: true } }),
       prisma.snippet.count({ where: { userId, isFavorite: true } }),
       prisma.snippet.count({ where: { userId, isPublic: true } }),
+      prisma.savedSnippet.count({ where: { userId } }),
       prisma.tag.findMany({
         where: { snippets: { some: { snippet: { userId } } } },
         select: { name: true, _count: { select: { snippets: true } } },
@@ -42,6 +44,7 @@ export async function getSidebarData(userId: number): Promise<SidebarData> {
     totalCopies: totalCopiesResult._sum.copyCount ?? 0,
     totalFavorites,
     totalPublic,
+    totalSaved,
     workspaceSnippetsCount,
     workspaces: memberships.map((m) => ({
       id: m.workspace.id,

@@ -15,6 +15,7 @@ export default async function Sidebar({ data }: SidebarProps) {
                 totalCopies={data.totalCopies}
                 totalFavorites={data.totalFavorites}
                 totalPublic={data.totalPublic}
+                totalSaved={data.totalSaved}
                 workspaceSnippetsCount={data.workspaceSnippetsCount}
                 workspaces={data.workspaces}
                 tags={data.tags}
@@ -32,6 +33,7 @@ export default async function Sidebar({ data }: SidebarProps) {
             totalCopies={fetched.totalCopies}
             totalFavorites={fetched.totalFavorites}
             totalPublic={fetched.totalPublic}
+            totalSaved={fetched.totalSaved}
             workspaceSnippetsCount={fetched.workspaceSnippetsCount}
             workspaces={fetched.workspaces}
             tags={fetched.tags}

@@ -23,6 +23,7 @@ model User {
 
   likes    Like[]
   snippets    Snippet[]
+  savedSnippets SavedSnippet[]
   collections Collection[]
   ownedWorkspaces        Workspace[]          @relation("WorkspaceOwner")
   workspaceMembers      WorkspaceMember[]
@@ -49,6 +50,7 @@ model Snippet {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   likes    Like[]
+  savedBy SavedSnippet[]
   tags        SnippetTag[]
   collections SnippetCollection[]
 
@@ -129,6 +131,21 @@ model Like {
 
   @@unique([userId, snippetId])
   @@map("likes")
+}
+
+model SavedSnippet {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  snippetId Int
+  savedAt   DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snippet Snippet @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, snippetId])
+  @@index([userId])
+  @@index([snippetId])
+  @@map("saved_snippets")
 }
 
 enum WorkspaceRole {

@@ -45,7 +45,8 @@ export async function GET(request: Request) {
         tags: { include: { tag: true } },
         user: { select: { id: true, name: true, avatar: true } },
         likes: userId ? { where: { userId }, select: { userId: true } } : false,
-        _count: { select: { likes: true } },
+        savedBy: userId ? { where: { userId }, select: { userId: true } } : false,
+        _count: { select: { likes: true, savedBy: true } },
       },
     }),
     prisma.snippet.count({ where }),
@@ -58,6 +59,8 @@ export async function GET(request: Request) {
       tags: s.tags.map((t) => t.tag.name), user: s.user,
       likeCount: s._count.likes,
       likedByMe: userId ? (s.likes as { userId: number }[]).length > 0 : false,
+      saveCount: s._count.savedBy,
+      savedByMe: userId ? (s.savedBy as { userId: number }[]).length > 0 : false,
     })),
     total, page: input.page, totalPages: Math.ceil(total / limit),
   })

@@ -60,6 +60,7 @@ export default function MobileSidebar({ initialSidebarData }: MobileSidebarProps
                                 totalCopies={sidebarData.totalCopies}
                                 totalFavorites={sidebarData.totalFavorites}
                                 totalPublic={sidebarData.totalPublic}
+                                totalSaved={sidebarData.totalSaved}
                                 workspaceSnippetsCount={sidebarData.workspaceSnippetsCount}
                                 workspaces={sidebarData.workspaces}
                                 tags={sidebarData.tags}

@@ -20,8 +20,25 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const lang = searchParams.get("lang") ?? undefined
   const tag = searchParams.get("tag") ?? undefined
-  const filter = searchParams.get("filter") as "favorites" | "public" | null
+  const filter = searchParams.get("filter") as "favorites" | "public" | "saved" | null
   const collection = searchParams.get("collection") ? Number(searchParams.get("collection")) : undefined
+
+  if (filter === "saved") {
+    const saved = await prisma.savedSnippet.findMany({
+      where: {
+        userId: authResult.userId,
+        ...(lang && { snippet: { language: lang } }),
+        ...(tag && { snippet: { tags: { some: { tag: { name: tag } } } } }),
+        ...(collection && { snippet: { collections: { some: { collectionId: collection } } } }),
+      },
+      include: { snippet: { include: { tags: { include: { tag: true } } } } },
+      orderBy: { savedAt: "desc" },
+    })
+    const available = saved
+      .map((s) => s.snippet)
+      .filter((sn) => sn.isPublic || sn.userId === authResult.userId)
+    return NextResponse.json(available)
+  }
 
   const snippets = await prisma.snippet.findMany({
     where: {

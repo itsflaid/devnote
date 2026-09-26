@@ -24,6 +24,8 @@ interface InitialData {
         user: { id: number; name: string; avatar: string | null }
         likeCount: number
         likedByMe: boolean
+        saveCount: number
+        savedByMe: boolean
     }[]
     total: number
     page: number

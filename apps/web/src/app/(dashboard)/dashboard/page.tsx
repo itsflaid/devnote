@@ -5,6 +5,7 @@ import { cookies } from "next/headers"
 import { Suspense } from "react"
 
 import SnippetList from "@/components/snippet/SnippetList"
+import SavedLibraryView, { type SavedLibraryItem } from "@/components/snippet/SavedLibraryView"
 import type { Snippet } from "@/components/snippet/shared/types"
 
 async function DashboardContent({
@@ -33,6 +34,75 @@ async function DashboardContent({
     sortPref === "az" ? { title: "asc" as const } :
     sortPref === "za" ? { title: "desc" as const } :
     { updatedAt: "desc" as const }
+
+  if (filter === "saved") {
+    const saved = await prisma.savedSnippet.findMany({
+      where: {
+        userId,
+        ...(lang && { snippet: { language: lang } }),
+        ...(tag && { snippet: { tags: { some: { tag: { name: tag } } } } }),
+        ...(collection && { snippet: { collections: { some: { collectionId: Number(collection) } } } }),
+      },
+      include: {
+        snippet: {
+          include: {
+            tags: { include: { tag: true } },
+            workspaces: { include: { workspace: { select: { id: true, name: true } } } },
+            user: { select: { id: true, name: true, avatar: true } },
+            likes: { where: { userId }, select: { userId: true } },
+            _count: { select: { likes: true, savedBy: true } },
+          },
+        },
+      },
+      orderBy: { savedAt: "desc" },
+    })
+
+    const unavailableIds = saved
+      .filter((s) => !s.snippet.isPublic && s.snippet.userId !== userId)
+      .map((s) => ({ snippetId: s.snippetId, savedAt: s.savedAt.toISOString() }))
+
+    const items: SavedLibraryItem[] = saved
+      .filter((s) => s.snippet.isPublic || s.snippet.userId === userId)
+      .map((s) => ({
+        snippet: {
+          id: s.snippet.id,
+          title: s.snippet.title,
+          language: s.snippet.language,
+          description: s.snippet.description ?? null,
+          code: s.snippet.code,
+          copyCount: s.snippet.copyCount,
+          isFavorite: s.snippet.isFavorite,
+          isPublic: s.snippet.isPublic,
+          shareId: s.snippet.shareId ?? null,
+          createdAt: s.snippet.createdAt.toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+          updatedAt: s.snippet.updatedAt.toISOString(),
+          tags: s.snippet.tags.map((t) => t.tag.name),
+          workspaces: s.snippet.workspaces.map((item) => ({
+            id: item.workspace.id,
+            name: item.workspace.name,
+          })),
+        },
+        owner: s.snippet.user,
+        isOwner: s.snippet.userId === userId,
+        likeCount: s.snippet._count.likes,
+        likedByMe: s.snippet.likes.length > 0,
+        saveCount: s.snippet._count.savedBy,
+        savedAt: s.savedAt.toISOString(),
+        createdAtISO: s.snippet.createdAt.toISOString(),
+      }))
+
+    return (
+      <SavedLibraryView
+        key={`saved-${lang ?? ""}-${tag ?? ""}-${collection ?? ""}`}
+        items={items}
+        unavailable={unavailableIds}
+      />
+    )
+  }
 
   const rawSnippets = await prisma.snippet.findMany({
     where: {

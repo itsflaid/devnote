@@ -8,6 +8,7 @@ import { getLang } from "@/lib/languages"
 import { timeAgo, getInitials } from "@/lib/format"
 import Image from "next/image"
 import ExploreSnippetDetailModal from "@/components/explore/ExploreSnippetDetailModal"
+import SaveButton from "@/components/explore/SaveButton"
 
 export interface PublicSnippet {
     id: number
@@ -21,6 +22,8 @@ export interface PublicSnippet {
     user: { id: number; name: string; avatar: string | null }
     likeCount: number
     likedByMe: boolean
+    saveCount: number
+    savedByMe: boolean
 }
 
 interface Props {
@@ -182,7 +185,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
 
             {/* Footer */}
             <div className="flex items-center justify-between px-5 pb-4 pl-7 pt-3 mt-3 border-t border-[var(--border2)]">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
                     <button
                         onClick={handleLike}
                         disabled={liking}
@@ -198,6 +201,13 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
                         </svg>
                         <span className="font-mono">{snippet.likeCount}</span>
                     </button>
+
+                    <SaveButton
+                        key={`save-${snippet.id}-${snippet.savedByMe}-${snippet.saveCount}`}
+                        snippetId={snippet.id}
+                        initialSaved={snippet.savedByMe ?? false}
+                        initialCount={snippet.saveCount ?? 0}
+                    />
 
                     <span className="flex items-center gap-1.5 text-[12px] text-[var(--text3)] font-mono">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -5,10 +5,11 @@ import Image from "next/image"
 import Link from "next/link"
 import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getLang } from "@/lib/languages"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faUser, faCopy, faCheck, faArrowRight, faChevronDown } from "@fortawesome/free-solid-svg-icons"
+import { faUser, faCopy, faCheck, faArrowRight, faChevronDown, faBookmark, faThumbsUp } from "@fortawesome/free-solid-svg-icons"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 interface ShareSnippet {
     id: number
@@ -21,22 +22,73 @@ interface ShareSnippet {
     createdAt: string
     tags: string[]
     user: {
+        id: number
         name: string
         avatar: string | null
     }
+    likeCount: number
+    likedByMe: boolean
+    saveCount: number
+    savedByMe: boolean
+    isOwner: boolean
 }
 
 export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
     const [copied, setCopied] = useState(false)
     const [copyCount, setCopyCount] = useState(snippet.copyCount)
     const [infoOpen, setInfoOpen] = useState(true)
+    const [liked, setLiked] = useState(snippet.likedByMe)
+    const [likeCount, setLikeCount] = useState(snippet.likeCount)
+    const [isSaved, setIsSaved] = useState(snippet.savedByMe)
+    const [saveCount, setSaveCount] = useState(snippet.saveCount)
     const lang = getLang(snippet.language)
+    const queryClient = useQueryClient()
+    const router = useRouter()
     const incrementCopy = useMutation({
         mutationFn: (id: number) =>
             fetch(`/api/snippets/${id}/copy`, { method: "POST" }).then(r => r.json()),
     })
+    const toggleLike = useMutation({
+        mutationFn: () =>
+            fetch(`/api/snippets/${snippet.id}/like`, { method: "POST" }).then(
+                (r) => r.json() as Promise<{ liked: boolean; count: number }>,
+            ),
+        onSuccess: (data) => {
+            setLiked(data.liked)
+            setLikeCount(data.count)
+            queryClient.invalidateQueries({ queryKey: ["explore"] })
+        },
+    })
+    const toggleSave = useMutation({
+        mutationFn: () =>
+            fetch(`/api/snippets/${snippet.id}/save`, { method: "POST" }).then(
+                (r) => r.json() as Promise<{ isSaved: boolean; saveCount: number }>,
+            ),
+        onSuccess: (data) => {
+            setIsSaved(data.isSaved)
+            setSaveCount(data.saveCount)
+            queryClient.invalidateQueries({ queryKey: ["explore"] })
+            queryClient.invalidateQueries({ queryKey: ["sidebar"] })
+        },
+    })
 
     const { data: session } = useSession()
+
+    const handleLike = () => {
+        if (!session?.user) {
+            router.push("/login")
+            return
+        }
+        toggleLike.mutate()
+    }
+
+    const handleSave = () => {
+        if (!session?.user) {
+            router.push("/login")
+            return
+        }
+        toggleSave.mutate()
+    }
 
 
     const handleCopy = async () => {
@@ -182,8 +234,8 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                     </div>
                                 )}
                                 <div>
-                                    <p className="font-medium text-white text-sm">{snippet.user.name}</p>
-                                    <p className="text-[10px] text-emerald-100/60">{formattedDate}</p>
+                                    <p className="font-medium text-white text-sm">@{snippet.user.name}</p>
+                                    <p className="text-[10px] text-emerald-100/60">{formattedDate} · {saveCount} disimpan</p>
                                 </div>
                             </div>
 
@@ -231,17 +283,48 @@ export default function SharePageSplit({ snippet }: { snippet: ShareSnippet }) {
                                 </span>
                             </div>
 
-                            <button
-                                onClick={handleCopy}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all border
-                                    ${copied
-                                        ? "bg-emerald-500 text-black border-emerald-400"
-                                        : "border-emerald-500/40 hover:border-emerald-400 hover:text-white text-emerald-100"
-                                    }`}
-                            >
-                                <FontAwesomeIcon icon={copied ? faCheck : faCopy} className="w-3.5 h-3.5" />
-                                {copied ? "Tersalin!" : "Salin"}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                {!snippet.isOwner && (
+                                    <>
+                                        <button
+                                            onClick={handleLike}
+                                            aria-label="Like note"
+                                            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-medium text-xs transition-all border
+                                                ${liked
+                                                    ? "bg-emerald-500 text-black border-emerald-400"
+                                                    : "border-emerald-500/40 hover:border-emerald-400 hover:text-white text-emerald-100"
+                                                }`}
+                                        >
+                                            <FontAwesomeIcon icon={faThumbsUp} className="w-3.5 h-3.5" />
+                                            <span className="font-mono">{likeCount}</span>
+                                        </button>
+                                        <button
+                                            onClick={handleSave}
+                                            aria-label={isSaved ? "Hapus dari saved" : "Simpan note"}
+                                            title={isSaved ? "Hapus dari saved" : "Simpan note"}
+                                            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-medium text-xs transition-all border
+                                                ${isSaved
+                                                    ? "bg-yellow-400 text-black border-yellow-300"
+                                                    : "border-emerald-500/40 hover:border-yellow-300 hover:text-yellow-200 text-emerald-100"
+                                                }`}
+                                        >
+                                            <FontAwesomeIcon icon={faBookmark} className="w-3.5 h-3.5" />
+                                            <span className="font-mono">{saveCount}</span>
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={handleCopy}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all border
+                                        ${copied
+                                            ? "bg-emerald-500 text-black border-emerald-400"
+                                            : "border-emerald-500/40 hover:border-emerald-400 hover:text-white text-emerald-100"
+                                        }`}
+                                >
+                                    <FontAwesomeIcon icon={copied ? faCheck : faCopy} className="w-3.5 h-3.5" />
+                                    {copied ? "Tersalin!" : "Salin"}
+                                </button>
+                            </div>
                         </div>
 
                         {/* CODE */}

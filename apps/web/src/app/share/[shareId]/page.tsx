@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import SharePageClient from "./SharePageClient"
 
 export async function generateMetadata({
@@ -56,6 +57,9 @@ export default async function SharePage({
 }) {
     const { shareId } = await params
 
+    const session = await auth()
+    const userId = session?.user?.id ? Number(session.user.id) : null
+
     const snippet = await prisma.snippet.findUnique({
         where: { shareId },
         select: {
@@ -67,8 +71,10 @@ export default async function SharePage({
             isPublic: true,
             copyCount: true,
             createdAt: true,
+            userId: true,
             user: {
                 select: {
+                    id: true,
                     name: true,
                     avatar: true,
                 }
@@ -77,13 +83,25 @@ export default async function SharePage({
                 select: {
                     tag: { select: { name: true } }
                 }
-            }
+            },
+            _count: { select: { likes: true, savedBy: true } },
         }
     })
 
     if (!snippet) notFound()
 
     const tags = snippet.tags.map(t => t.tag.name)
+    const isOwner = userId != null && snippet.userId === userId
+    const [likedByMe, savedByMe] = userId != null
+        ? await Promise.all([
+            prisma.like.findUnique({
+                where: { userId_snippetId: { userId, snippetId: snippet.id } },
+            }).then((r) => !!r),
+            prisma.savedSnippet.findUnique({
+                where: { userId_snippetId: { userId, snippetId: snippet.id } },
+            }).then((r) => !!r),
+        ])
+        : [false, false]
 
     return (
         <SharePageClient
@@ -91,6 +109,11 @@ export default async function SharePage({
                 ...snippet,
                 tags,
                 createdAt: snippet.createdAt.toISOString(),
+                likeCount: snippet._count.likes,
+                likedByMe,
+                saveCount: snippet._count.savedBy,
+                savedByMe,
+                isOwner,
             }}
         />
     )

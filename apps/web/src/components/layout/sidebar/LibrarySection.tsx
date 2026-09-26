@@ -24,6 +24,7 @@ interface LibrarySectionProps {
   totalSnippets: number
   totalFavorites: number
   totalPublic: number
+  totalSaved: number
   workspaceSnippetsCount: number
   onNavigate?: () => void
 }
@@ -32,6 +33,7 @@ export default function LibrarySection({
   totalSnippets,
   totalFavorites,
   totalPublic,
+  totalSaved,
   workspaceSnippetsCount,
   onNavigate,
 }: LibrarySectionProps) {
@@ -96,6 +98,7 @@ export default function LibrarySection({
   useEffect(() => {
     router.prefetch("/dashboard")
     router.prefetch("/dashboard?filter=favorites")
+    router.prefetch("/dashboard?filter=saved")
     router.prefetch("/dashboard?filter=public")
     router.prefetch("/dashboard?filter=workspace")
   }, [router])
@@ -144,7 +147,14 @@ export default function LibrarySection({
         icon={faStar}
       />
 
-      <NavItem label="Saved" count={0} active={false} icon={faBookmark} />
+      <NavItem
+        label="Saved"
+        count={totalSaved}
+        active={activeFilter === "saved"}
+        onClick={() => setFilter("filter", "saved")}
+        onPrefetch={() => prefetchRoute("filter", "saved")}
+        icon={faBookmark}
+      />
 
       <NavItem
         label="Public"
