@@ -17,7 +17,7 @@ async function getInitialExploreData() {
             include: {
                 tags: { include: { tag: true } },
                 user: { select: { id: true, name: true, avatar: true } },
-                _count: { select: { likes: true } },
+                _count: { select: { likes: true, savedBy: true } },
             },
         }),
         prisma.snippet.count({ where: { isPublic: true } }),
@@ -35,6 +35,8 @@ async function getInitialExploreData() {
         user: s.user,
         likeCount: s._count.likes,
         likedByMe: false,
+        saveCount: s._count.savedBy,
+        savedByMe: false,
     }))
 
     return { snippets, total, page: 1, totalPages: Math.ceil(total / 5) }

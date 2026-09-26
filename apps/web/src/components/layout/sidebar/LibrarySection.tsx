@@ -24,6 +24,7 @@ interface LibrarySectionProps {
   totalSnippets: number
   totalFavorites: number
   totalPublic: number
+  totalSaved?: number
   workspaceSnippetsCount: number
   onNavigate?: () => void
 }
@@ -32,9 +33,11 @@ export default function LibrarySection({
   totalSnippets,
   totalFavorites,
   totalPublic,
+  totalSaved,
   workspaceSnippetsCount,
   onNavigate,
 }: LibrarySectionProps) {
+  void totalSaved
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()

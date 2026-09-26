@@ -20,6 +20,7 @@ interface SidebarClientProps {
   totalCopies: number
   totalFavorites: number
   totalPublic: number
+  totalSaved: number
   workspaceSnippetsCount: number
   workspaces: WorkspaceNavItem[]
   tags: { name: string; count: number }[]
@@ -31,6 +32,7 @@ export default function SidebarClient({
   totalCopies,
   totalFavorites,
   totalPublic,
+  totalSaved,
   workspaceSnippetsCount,
   workspaces,
   tags,
@@ -82,6 +84,7 @@ export default function SidebarClient({
         totalSnippets={totalSnippets}
         totalFavorites={totalFavorites}
         totalPublic={totalPublic}
+        totalSaved={totalSaved}
         workspaceSnippetsCount={workspaceSnippetsCount}
         onNavigate={onNavigate}
       />
