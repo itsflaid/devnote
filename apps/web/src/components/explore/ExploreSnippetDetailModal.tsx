@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faTimes } from "@fortawesome/free-solid-svg-icons"
 import CodeBlock from "@/components/snippet/shared/CodeBlock"
 import { getInitials, timeAgo } from "@/lib/format"
 import Image from "next/image"
 import type { PublicSnippet } from "./ExploreSnippetCard"
+import SaveButton from "./SaveButton"
 
 interface Lang { label: string; color: string }
 
@@ -23,6 +25,7 @@ interface Props {
 export default function ExploreSnippetDetailModal({
     snippet, lang, liking, copied, onLikeClick, onCopyClick, onClose,
 }: Props) {
+    const { data: session } = useSession()
     useEffect(() => {
         if (!snippet) return
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -33,6 +36,8 @@ export default function ExploreSnippetDetailModal({
     }, [snippet, onClose])
 
     if (!snippet) return null
+
+    const isOwner = session?.user?.id != null && Number(session.user.id) === snippet.user.id
 
     return (
         <div
@@ -79,10 +84,10 @@ export default function ExploreSnippetDetailModal({
                                     </div>
                                 )}
                                 <span className="text-[12px] font-medium text-[var(--text2)]">
-                                    {snippet.user.name}
+                                    @{snippet.user.name}
                                 </span>
                                 <span className="text-[11px] text-[var(--text3)]">
-                                    · {timeAgo(snippet.createdAt)}
+                                    · {timeAgo(snippet.createdAt)} · {snippet.saveCount ?? 0} disimpan
                                 </span>
                             </div>
                         </div>
@@ -102,21 +107,31 @@ export default function ExploreSnippetDetailModal({
 
                 {/* Footer */}
                 <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-[var(--border)]">
-                    <button
-                        onClick={onLikeClick}
-                        disabled={liking}
-                        className={`flex items-center gap-1.5 text-[12px] transition-all px-2.5 py-1.5 rounded-lg ${
-                            snippet.likedByMe
-                                ? "text-[var(--em)] bg-[var(--em-faint)]"
-                                : "text-[var(--text3)] hover:text-[var(--em)] hover:bg-[var(--em-faint)]"
-                        }`}
-                    >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill={snippet.likedByMe ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
-                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
-                            <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                        </svg>
-                        <span className="font-mono">{snippet.likeCount}</span>
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={onLikeClick}
+                            disabled={liking}
+                            className={`flex items-center gap-1.5 text-[12px] transition-all px-2.5 py-1.5 rounded-lg ${
+                                snippet.likedByMe
+                                    ? "text-[var(--em)] bg-[var(--em-faint)]"
+                                    : "text-[var(--text3)] hover:text-[var(--em)] hover:bg-[var(--em-faint)]"
+                            }`}
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill={snippet.likedByMe ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                                <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+                                <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                            </svg>
+                            <span className="font-mono">{snippet.likeCount}</span>
+                        </button>
+
+                        {!isOwner && (
+                            <SaveButton
+                                snippetId={snippet.id}
+                                initialSaved={snippet.savedByMe ?? false}
+                                initialCount={snippet.saveCount ?? 0}
+                            />
+                        )}
+                    </div>
 
                     <button
                         onClick={onCopyClick}
