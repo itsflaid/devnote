@@ -126,6 +126,7 @@ export default function ExploreSnippetDetailModal({
 
                         {!isOwner && (
                             <SaveButton
+                                key={`save-modal-${snippet.id}-${snippet.savedByMe}-${snippet.saveCount}`}
                                 snippetId={snippet.id}
                                 initialSaved={snippet.savedByMe ?? false}
                                 initialCount={snippet.saveCount ?? 0}

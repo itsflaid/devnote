@@ -203,6 +203,7 @@ export default function ExploreSnippetCard({ snippet, onLikeToggle }: Props) {
                     </button>
 
                     <SaveButton
+                        key={`save-${snippet.id}-${snippet.savedByMe}-${snippet.saveCount}`}
                         snippetId={snippet.id}
                         initialSaved={snippet.savedByMe ?? false}
                         initialCount={snippet.saveCount ?? 0}

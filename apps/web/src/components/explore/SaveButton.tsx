@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -22,16 +22,9 @@ export default function SaveButton({
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
+  // NOTE: parent passes key={...savedByMe...saveCount} so remount resets state on refetch.
   const [isSaved, setIsSaved] = useState(initialSaved)
   const [saveCount, setSaveCount] = useState(initialCount)
-
-  useEffect(() => {
-    setIsSaved(initialSaved)
-  }, [initialSaved])
-
-  useEffect(() => {
-    setSaveCount(initialCount)
-  }, [initialCount])
 
   const toggleSave = useMutation({
     mutationFn: () =>
@@ -40,12 +33,14 @@ export default function SaveButton({
         return r.json() as Promise<SaveResponse>
       }),
     onMutate: () => {
-      setIsSaved((prev) => !prev)
-      setSaveCount((prev) => (isSaved ? Math.max(0, prev - 1) : prev + 1))
+      const next = !isSaved
+      setIsSaved(next)
+      setSaveCount((prev) => (next ? prev + 1 : Math.max(0, prev - 1)))
     },
     onError: () => {
-      setIsSaved((prev) => !prev)
-      setSaveCount((prev) => (isSaved ? prev + 1 : Math.max(0, prev - 1)))
+      const next = !isSaved
+      setIsSaved(!next)
+      setSaveCount((prev) => (!next ? prev + 1 : Math.max(0, prev - 1)))
     },
     onSuccess: (data) => {
       setIsSaved(data.isSaved)
