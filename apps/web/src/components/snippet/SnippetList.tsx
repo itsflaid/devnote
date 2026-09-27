@@ -2,17 +2,141 @@
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { useSearchParams } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import { type Snippet } from "./shared/types"
 import SnippetDetail from "./shared/SnippetDetail"
 import SnippetExplorer from "./shared/SnippetExplorer"
 import SnippetListHeader from "./shared/SnippetListHeader"
+import EmptyState from "./shared/EmptyState"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faCode, faPlus, faArrowLeft } from "@fortawesome/free-solid-svg-icons"
+import {
+  faCode,
+  faArrowLeft,
+  faStar,
+  faGlobe,
+  faUsers,
+  faCopy,
+  faFolder,
+  faTag,
+} from "@fortawesome/free-solid-svg-icons"
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core"
 import SnippetModal from "./SnippetModal"
 import { AnimatePresence, motion } from "framer-motion"
 import { useAppStore } from "@/lib/store"
 import SnippetListSkeleton from "./SnippetListSkeleton"
 import SnippetCard from "./shared/SnippetCard"
+
+interface CollectionOption {
+  id: number
+  name: string
+}
+
+interface ViewConfig {
+  headerLabel: string
+  icon: IconDefinition
+  emptyTitle: string
+  emptySubtitle: string
+  showAddCta: boolean
+}
+
+function buildViewConfig({
+  filter,
+  collectionId,
+  collectionName,
+  tag,
+  lang,
+}: {
+  filter: string | null
+  collectionId: string | null
+  collectionName: string | undefined
+  tag: string | null
+  lang: string | null
+}): ViewConfig {
+  if (collectionId) {
+    const name = collectionName ?? null
+    return {
+      headerLabel: name ? `Koleksi: ${name}` : "Koleksi",
+      icon: faFolder,
+      emptyTitle: name
+        ? `Belum ada note di koleksi "${name}"`
+        : "Belum ada note di koleksi ini",
+      emptySubtitle: "Tambahkan note ke koleksi ini dari halaman detail note",
+      showAddCta: false,
+    }
+  }
+
+  if (tag) {
+    return {
+      headerLabel: `Tag: ${tag}`,
+      icon: faTag,
+      emptyTitle: `Belum ada note dengan tag "${tag}"`,
+      emptySubtitle:
+        "Note dengan tag ini bakal muncul di sini begitu kamu tambahkan tag-nya",
+      showAddCta: false,
+    }
+  }
+
+  if (filter === "favorites") {
+    return {
+      headerLabel: "Favorites",
+      icon: faStar,
+      emptyTitle: "Belum ada favorite",
+      emptySubtitle:
+        "Tandai note yang sering kamu pakai dengan ikon bintang di halaman detail note",
+      showAddCta: false,
+    }
+  }
+
+  if (filter === "public") {
+    return {
+      headerLabel: "Public",
+      icon: faGlobe,
+      emptyTitle: "Belum ada note public",
+      emptySubtitle:
+        "Jadikan salah satu notemu public dari halaman detail biar bisa dilihat orang lain",
+      showAddCta: false,
+    }
+  }
+
+  if (filter === "workspace") {
+    return {
+      headerLabel: "Workspace Notes",
+      icon: faUsers,
+      emptyTitle: "Belum ada note dari workspace",
+      emptySubtitle:
+        "Note yang ditambahkan di workspace yang kamu ikuti bakal muncul di sini",
+      showAddCta: false,
+    }
+  }
+
+  if (filter === "most-copied") {
+    return {
+      headerLabel: "Paling Banyak Dicopy",
+      icon: faCopy,
+      emptyTitle: "Belum ada note yang di-copy",
+      emptySubtitle: "Note yang paling banyak di-copy bakal muncul di sini",
+      showAddCta: false,
+    }
+  }
+
+  if (lang) {
+    return {
+      headerLabel: `Bahasa: ${lang}`,
+      icon: faCode,
+      emptyTitle: `Belum ada note dengan bahasa "${lang}"`,
+      emptySubtitle: "Note dengan bahasa ini bakal muncul di sini",
+      showAddCta: false,
+    }
+  }
+
+  return {
+    headerLabel: "Semua Note",
+    icon: faCode,
+    emptyTitle: "Belum ada note",
+    emptySubtitle: "Mulai simpan note pertamamu",
+    showAddCta: true,
+  }
+}
 
 export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
   const [modalOpen, setModalOpen] = useState(false)
@@ -29,6 +153,35 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
 
   const searchParams = useSearchParams()
   const searchQuery = searchParams.get("search") ?? ""
+  const filterParam = searchParams.get("filter")
+  const collectionParam = searchParams.get("collection")
+  const tagParam = searchParams.get("tag")
+  const langParam = searchParams.get("lang")
+
+  // Reuse cache "collections" yang sama kayak yang dipakai CollectionSection
+  // di sidebar, biar gak nambah network call baru cuma buat ambil nama
+  // koleksi aktif.
+  const { data: collectionsData } = useQuery<CollectionOption[]>({
+    queryKey: ["collections"],
+    queryFn: () => fetch("/api/collections").then((r) => r.json()),
+    enabled: !!collectionParam,
+  })
+
+  const collectionName = collectionsData?.find(
+    (c) => String(c.id) === collectionParam
+  )?.name
+
+  const viewConfig = useMemo(
+    () =>
+      buildViewConfig({
+        filter: filterParam,
+        collectionId: collectionParam,
+        collectionName,
+        tag: tagParam,
+        lang: langParam,
+      }),
+    [filterParam, collectionParam, collectionName, tagParam, langParam]
+  )
 
   // Sinkronkan state lokal dengan data server setiap props berubah
   // (router.refresh / navigasi). Mutation edit/delete di-patch langsung
@@ -119,31 +272,20 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
   if (localSnippets.length === 0) {
     return (
       <>
-        <div className="flex h-full items-center justify-center">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="w-[56px] h-[56px] rounded-[12px] border border-[var(--border)] bg-[var(--surface)] flex items-center justify-center text-[var(--text3)]">
-              <FontAwesomeIcon icon={faCode} className="w-[22px] h-[22px]" />
-            </div>
-
-            <div>
-              <p className="text-[15px] font-semibold text-[var(--text)] mb-1">
-                Belum ada note
-              </p>
-
-              <p className="text-[13px] text-[var(--text3)]">
-                Mulai simpan note pertamamu
-              </p>
-            </div>
-
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex items-center gap-2 bg-[var(--em)] text-[#0a0a0a] font-semibold text-[13px] px-5 py-2.5 rounded-lg hover:bg-[#2bc48a] transition-all"
-            >
-              <FontAwesomeIcon icon={faPlus} className="w-[12px] h-[12px]" />
-              Tambah Note
-            </button>
-          </div>
-        </div>
+        <EmptyState
+          icon={viewConfig.icon}
+          title={viewConfig.emptyTitle}
+          subtitle={viewConfig.emptySubtitle}
+          action={
+            viewConfig.showAddCta
+              ? {
+                  type: "button",
+                  label: "Tambah Note",
+                  onClick: () => setModalOpen(true),
+                }
+              : { type: "link", label: "Lihat Semua Note", href: "/dashboard" }
+          }
+        />
 
         <SnippetModal
           key="create"
@@ -161,11 +303,16 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
       {/* desktop */}
       <div className="hidden lg:flex h-full overflow-hidden">
         <SnippetExplorer
-          title="Semua Note"
+          title={viewConfig.headerLabel}
           items={filteredSnippets}
           getSnippet={(snippet) => snippet}
           getKey={(snippet) => snippet.id}
           listWidthClassName="w-[330px]"
+          emptyFilterMessage={
+            searchQuery.trim()
+              ? `Tidak ada note yang cocok dengan pencarian "${searchQuery.trim()}"`
+              : "Tidak ada note yang cocok"
+          }
           renderDetail={(selected) => (
             <SnippetDetail
               key={selected.id}
@@ -190,7 +337,7 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
               className="absolute inset-0 flex flex-col bg-[var(--bg2)]"
             >
               <SnippetListHeader
-                title="Semua Note"
+                title={viewConfig.headerLabel}
                 visibleCount={mobileVisibleSnippets.length}
                 totalCount={filteredSnippets.length}
                 activeLang={activeLang}
@@ -217,7 +364,11 @@ export default function SnippetList({ snippets }: { snippets: Snippet[] }) {
 
                 {mobileVisibleSnippets.length === 0 && (
                   <p className="text-[12px] text-[var(--text4)] text-center py-8">
-                    Tidak ada note yang cocok
+                    {searchQuery.trim()
+                      ? `Tidak ada note yang cocok dengan pencarian "${searchQuery.trim()}"`
+                      : activeLang
+                      ? "Tidak ada note dengan bahasa ini"
+                      : "Tidak ada note yang cocok"}
                   </p>
                 )}
               </div>
