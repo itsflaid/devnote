@@ -15,6 +15,14 @@ interface SnippetExplorerProps<TItem> {
   getKey: (item: TItem) => string | number
   getAuthorName?: (item: TItem) => string | undefined
   listWidthClassName?: string
+  /**
+   * Pesan yang ditampilkan saat `items` yang MASUK ke komponen ini sudah
+   * kosong duluan (misal karena search di parent gak nemu apa-apa).
+   * Beda sama kondisi filter bahasa internal (`activeLang`) yang
+   * ngosongin `items` yang tadinya non-kosong — itu tetap pakai pesan
+   * "Tidak ada note dengan bahasa ini" di bawah.
+   */
+  emptyFilterMessage?: string
   renderDetail: (snippet: Snippet, item: TItem) => React.ReactNode
 }
 
@@ -25,6 +33,7 @@ export default function SnippetExplorer<TItem>({
   getKey,
   getAuthorName,
   listWidthClassName = "w-[300px]",
+  emptyFilterMessage = "Tidak ada note yang cocok",
   renderDetail,
 }: SnippetExplorerProps<TItem>) {
   const [selectedId, setSelectedId] = useState<number | null>(
@@ -73,6 +82,9 @@ export default function SnippetExplorer<TItem>({
 
   const selectedSnippet = selectedItem ? getSnippet(selectedItem) : null
 
+  const emptyMessage =
+    items.length === 0 ? emptyFilterMessage : "Tidak ada note dengan bahasa ini"
+
   return (
     <div className="flex-1 min-h-0 overflow-hidden bg-[var(--bg)]">
       <div className="hidden lg:flex h-full min-h-0">
@@ -112,7 +124,7 @@ export default function SnippetExplorer<TItem>({
 
           {visibleItems.length === 0 && (
             <p className="text-[12px] text-[var(--text4)] text-center py-8">
-              Tidak ada note dengan bahasa ini
+              {emptyMessage}
             </p>
           )}
         </div>
@@ -173,7 +185,7 @@ export default function SnippetExplorer<TItem>({
 
                 {visibleItems.length === 0 && (
                   <p className="text-[12px] text-[var(--text4)] text-center py-8">
-                    Tidak ada note dengan bahasa ini
+                    {emptyMessage}
                   </p>
                 )}
               </div>
