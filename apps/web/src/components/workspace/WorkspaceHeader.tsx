@@ -119,6 +119,7 @@ export default function WorkspaceHeader({
                         key={`${member.name}-${i}`}
                         src={member.avatar}
                         name={member.name}
+                        size={24}
                         className="h-6 w-6 text-[9px]"
                       />
                     ))}
