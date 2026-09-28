@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { Suspense } from "react"
 import { auth } from "@/lib/auth"
 import { getSidebarData } from "@/server/services/sidebarData"
@@ -7,7 +8,9 @@ import MobileSidebar from "@/components/layout/MobileSidebar"
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
     const session = await auth()
-    const sidebarData = session?.user?.id ? await getSidebarData(Number(session.user.id)) : undefined
+    if (!session?.user?.id) redirect("/login")
+
+    const sidebarData = await getSidebarData(Number(session.user.id))
 
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-[var(--bg)]">

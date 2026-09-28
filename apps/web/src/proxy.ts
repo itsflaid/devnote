@@ -1,25 +1,31 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { auth } from "@/lib/auth"
 
-export function proxy(request: NextRequest) {
-    const token = request.cookies.get("authjs.session-token") ||
-        request.cookies.get("__Secure-authjs.session-token")
+const PROTECTED = ["/dashboard", "/preferences", "/profile", "/workspaces"]
+const AUTH_PAGES = ["/login", "/register"]
 
-    const isProtected = ["/dashboard", "/snippets", "/collections", "/settings"]
-        .some(path => request.nextUrl.pathname.startsWith(path))
+const matches = (pathname: string, base: string) =>
+    pathname === base || pathname.startsWith(base + "/")
 
-    if (isProtected && !token) {
-        return NextResponse.redirect(new URL("/login", request.url))
+export default auth((req) => {
+    const { pathname } = req.nextUrl
+    const isLoggedIn = !!req.auth
+
+    if (!isLoggedIn && PROTECTED.some((p) => matches(pathname, p))) {
+        return Response.redirect(new URL("/login", req.url))
     }
 
-    return NextResponse.next()
-}
+    if (isLoggedIn && AUTH_PAGES.some((p) => matches(pathname, p))) {
+        return Response.redirect(new URL("/dashboard", req.url))
+    }
+})
 
 export const config = {
     matcher: [
         "/dashboard/:path*",
-        "/snippets/:path*",
-        "/collections/:path*",
-        "/settings/:path*",
-    ]
+        "/preferences/:path*",
+        "/profile/:path*",
+        "/workspaces/:path*",
+        "/login",
+        "/register",
+    ],
 }
