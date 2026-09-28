@@ -74,8 +74,7 @@ Access DevNote resources directly inside VS Code.
 - TailwindCSS
 - Prisma
 - PostgreSQL
-- NextAuth.js
-- tRPC
+- Auth.js (NextAuth v5)
 - React Query
 - Shiki
 - Zustand
@@ -145,42 +144,62 @@ Access DevNote resources directly inside VS Code.
 
 ## Getting Started
 
-### Clone Repository
+### Prasyarat
+
+- Node.js 20+
+- pnpm
+- PostgreSQL (Neon / Supabase / lokal)
+- Google OAuth Client (opsional, untuk login Google)
+
+### 1. Clone & install
 
 ```bash
 git clone <repository-url>
 cd devnote
-```
-
-### Install Dependencies
-
-```bash
 pnpm install
 ```
 
-### Configure Environment Variables
+### 2. Environment variables
 
-Create a `.env` file:
+Ini monorepo — file env ada di **`apps/web/`**, bukan di root.
 
-```env
-DATABASE_URL=
-DIRECT_URL=
-AUTH_SECRET=
-AUTH_GOOGLE_ID=
-AUTH_GOOGLE_SECRET=
+```bash
+cp apps/web/.env.example apps/web/.env
 ```
 
-### Run Development Server
+Isi:
+
+```env
+DATABASE_URL=       # koneksi database (boleh pooler)
+DIRECT_URL=         # koneksi database tanpa pooler (untuk migrate)
+AUTH_SECRET=        # generate: openssl rand -base64 32
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+Setup Google OAuth: di Google Cloud Console buat OAuth Client (Web application) dan tambahkan
+Authorized redirect URI:
+
+```txt
+http://localhost:3000/api/auth/callback/google
+```
+
+(untuk production tambahkan `https://<domain-kamu>/api/auth/callback/google`)
+
+### 3. Database
+
+```bash
+pnpm --filter web db:generate
+pnpm --filter web db:migrate
+```
+
+### 4. Jalankan
 
 ```bash
 pnpm dev
 ```
 
-Open:
-
-```txt
-http://localhost:3000
-```
+Buka `http://localhost:3000`.
 
 ---
 
