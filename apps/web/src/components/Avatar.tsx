@@ -1,14 +1,26 @@
+import Image from "next/image"
 import { getInitials } from "@/lib/format"
 
 interface AvatarProps {
   src: string | null | undefined
   name: string
   className?: string
+  size?: number
 }
 
-export default function Avatar({ src, name, className }: AvatarProps) {
+export default function Avatar({ src, name, className, size = 32 }: AvatarProps) {
   if (src) {
-    return <img src={src} alt={name} className={`shrink-0 rounded-full object-cover ${className ?? ""}`} />
+    return (
+      <Image
+        src={src}
+        alt={name}
+        width={size}
+        height={size}
+        sizes={`${size}px`}
+        referrerPolicy="no-referrer"
+        className={`shrink-0 rounded-full object-cover ${className ?? ""}`}
+      />
+    )
   }
 
   return (

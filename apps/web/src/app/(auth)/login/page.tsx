@@ -10,7 +10,12 @@ export const metadata: Metadata = {
     },
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ error?: string }>
+}) {
+    const { error } = await searchParams
     return (
         <>
             <div className="sr-only">
@@ -18,7 +23,7 @@ export default function LoginPage() {
                 <p>Masuk ke akun DevNote untuk menyimpan, mengelola, dan berbagi code snippet pribadimu. DevNote adalah code note manager gratis untuk developer Indonesia yang memungkinkan kamu menyimpan kode online, mengorganisir dengan tag, dan membagikannya dengan mudah.</p>
                 <p>Fitur DevNote: simpan kode online, organize dengan tag, share kode ke teman, explore kode publik dari developer lain, dan akses kode kapan saja dari mana saja.</p>
             </div>
-            <LoginPageClient />
+            <LoginPageClient authError={error} />
         </>
     )
 }

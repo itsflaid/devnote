@@ -545,6 +545,7 @@ function MemberRow({
         <Avatar
           src={member.user.avatar}
           name={member.user.name}
+          size={36}
           className="h-9 w-9 border border-[var(--em-border)] text-xs"
         />
         <div className="min-w-0">
